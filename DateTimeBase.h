@@ -156,49 +156,49 @@ public:
     template<typename T>
     TimeSpan operator-(const DateTimeBase<T>& raw) const {
         //Just sync time here
-        return TimeSpan(DateTimeBase<derivedSyncClass>::getRawTime() - raw.getRawTime());
+        return TimeSpan(getRawTime() - raw.getRawTime());
     }
 
 
     derivedSyncClass operator+=(const TimeSpan& ts2) {
-        DateTimeBase<derivedSyncClass>::addRawTime(ts2.getRaw());
+        addRawTime(ts2.getRaw());
         return *static_cast<derivedSyncClass*>(this);
     }
 
     derivedSyncClass operator+=(const int64_t _raw) {
-        DateTimeBase<derivedSyncClass>::addRawTime(_raw);
+        addRawTime(_raw);
         return *static_cast<derivedSyncClass*>(this);
     }
 
     derivedSyncClass& operator++() {
-        DateTimeBase<derivedSyncClass>::addRawTime(1);
+        addRawTime(1);
         return *static_cast<derivedSyncClass*>(this);
     }
 
     derivedSyncClass operator++(int) {
         derivedSyncClass ret = *static_cast<derivedSyncClass*>(this);
-        DateTimeBase<derivedSyncClass>::addRawTime(1);
+        addRawTime(1);
         return ret;
     }
 
     derivedSyncClass operator-=(const TimeSpan& ts2) {
-        DateTimeBase<derivedSyncClass>::addRawTime(-ts2.getRaw());
+        addRawTime(-ts2.getRaw());
         return *static_cast<derivedSyncClass*>(this);
     }
 
     derivedSyncClass operator-=(const int64_t _raw) {
-        DateTimeBase<derivedSyncClass>::addRawTime(-_raw);
+        addRawTime(-_raw);
         return *static_cast<derivedSyncClass*>(this);
     }
 
     derivedSyncClass& operator--() {
-        DateTimeBase<derivedSyncClass>::addRawTime(-1);
+        addRawTime(-1);
         return *static_cast<derivedSyncClass*>(this);
     }
 
     derivedSyncClass operator--(int) {
         derivedSyncClass ret = *static_cast<derivedSyncClass*>(this);
-        DateTimeBase<derivedSyncClass>::addRawTime(-1);
+        addRawTime(-1);
         return ret;
     }
 
@@ -206,56 +206,159 @@ public:
 
     template<class T>
     bool operator==(DateTimeBase<T>& dt2) const{
-        return DateTimeBase<derivedSyncClass>::getRawTime() == dt2.getRawTime();
+        return getRawTime() == dt2.getRawTime();
     }
 
     bool operator==(int64_t mil) const {
-        return DateTimeBase<derivedSyncClass>::getRawTime() == mil;
+        return getRawTime() == mil;
     }
 
     template<class T>
     bool operator!=(DateTimeBase<T>& dt2) const {
-        return DateTimeBase<derivedSyncClass>::getRawTime() != dt2.getRawTime();
+        return getRawTime() != dt2.getRawTime();
     }
 
     bool operator!=(int64_t mil) const {
-        return DateTimeBase<derivedSyncClass>::getRawTime() != mil;
+        return getRawTime() != mil;
     }
 
     template<class T>
     bool operator>=(DateTimeBase<T>& dt2) const {
-        return DateTimeBase<derivedSyncClass>::getRawTime() >= dt2.getRawTime();
+        return getRawTime() >= dt2.getRawTime();
     }
 
     bool operator>=(int64_t mil) const {
-        return DateTimeBase<derivedSyncClass>::getRawTime() >= mil;
+        return getRawTime() >= mil;
     }
 
     template<class T>
     bool operator<=(DateTimeBase<T>& dt2) const {
-        return DateTimeBase<derivedSyncClass>::getRawTime() <= dt2.getRawTime();
+        return getRawTime() <= dt2.getRawTime();
     }
 
     bool operator<=(int64_t mil) const {
-        return DateTimeBase<derivedSyncClass>::getRawTime() <= mil;
+        return getRawTime() <= mil;
     }
 
     template<class T>
     bool operator<(DateTimeBase<T>& dt2) const {
-        return DateTimeBase<derivedSyncClass>::getRawTime() < dt2.getRawTime();
+        return getRawTime() < dt2.getRawTime();
     }
 
     bool operator<(int64_t mil) const {
-        return DateTimeBase<derivedSyncClass>::getRawTime() < mil;
+        return getRawTime() < mil;
     }
 
     template<class T>
     bool operator>(DateTimeBase<T>& dt2) const {
-        return DateTimeBase<derivedSyncClass>::getRawTime() > dt2.getRawTime();
+        return getRawTime() > dt2.getRawTime();
     }
 
     bool operator>(int64_t mil) const {
-        return DateTimeBase<derivedSyncClass>::getRawTime() > mil;
+        return getRawTime() > mil;
+    }
+
+    /**
+    * @brief Gets Unix time, which is count of seconds from 1970/01/01.
+    */
+    inline int64_t getUnix() const {
+        return (getRawTime() - 62135596800000000LL) / SECOND;
+    }
+
+    /**
+    * @brief Factory method, which creates DateTime instance from Unix time.
+    * @note Microseconds and milliseconds fields will be set to 0.
+    * @param unixTime Unix time, which is count of seconds from 1970/01/01.
+    */
+    static derivedSyncClass fromUnix(int64_t unixTime) {
+        unixTime = (unixTime * SECOND) + 62135596800000000LL;
+        return derivedSyncClass(unixTime);
+    }
+
+    /**
+    * @brief Gets Date and Time represented as OLE Automation date.
+    */
+    inline double getOADate() const {
+        return ((double)(getRawTime() - 59926435200000000LL)) / DAY;
+        return 0.00;
+    }
+
+    /**
+    * @brief Factory method, which creates DateTime instance from OADate.
+    * @param OADate Date and time represented as an OLE Automation date.
+    */
+    static derivedSyncClass fromOADate(double OADate) {
+        int64_t rawVal = (OADate * DAY);
+        rawVal += 59926435200000000LL;
+        return derivedSyncClass(rawVal);
+    }
+
+    /**
+    * @brief Gets time_t time, which is usually (depends on std library) count of seconds from 1970/01/01.
+    */
+    inline time_t get_time_t() const {
+        return (getRawTime() - 62135596800000000LL) / (SECOND / CLOCKS_PER_SEC);
+    }
+
+    /**
+    * @brief Factory method, which creates DateTime instance from time_t.
+    * @note Microseconds and milliseconds fields will be set to 0.
+    * @param time Time, which is usually (depends on std library) count of seconds from 1970/01/01.
+    */
+    static derivedSyncClass from_time_t(time_t time) {
+        time = (time * (SECOND / CLOCKS_PER_SEC)) + 62135596800000000LL;
+        return derivedSyncClass(time);
+    }
+
+    /**
+    * @brief Gets tm time structure.
+    */
+    tm get_tm() const {
+        DateTime_DST_tuple tup;
+        if constexpr (has_getDateTimeEnh<derivedSyncClass>::value) {
+            tup = static_cast<const derivedSyncClass*>(this)->getDateTimeEnh(); //getting DateTime with isDST flag at same time
+        }
+        else {
+            if constexpr (has_isDST<derivedSyncClass>::value) {
+                tup.isDST = static_cast<const derivedSyncClass*>(this)->isDST();
+            }
+            else {
+                tup.isDST = false;
+            }
+            tup.value = getRawTime();
+        }
+        date_time_s dt_s = dtlib::rawToDateTime(tup.value);
+        tm t;
+        t.tm_isdst = tup.isDST;
+        t.tm_hour = dt_s.hours;
+        t.tm_min = dt_s.minutes;
+        t.tm_sec = dt_s.seconds;
+        t.tm_year = 1900 - dt_s.year; //TODO maybe this is not true on ESP32/ESP8266 - test
+        t.tm_mon = (int8_t)dt_s.month - 1;
+        t.tm_mday = dt_s.day;
+        t.tm_wday = (int8_t)dt_s.dayOfWeek - 1;
+        bool isLeap = dtlib::isLeapYear(dt_s.year);
+        t.tm_yday = dtlib::getDayOfYearFromMonth(dt_s.month, isLeap) + dt_s.day - 1;
+        return t;
+    }
+
+    /**
+    * @brief Factory method, which creates DateTime instance from tm structure.
+    * @note Microseconds and milliseconds fields will be set to 0.
+    * @warning tm_isdst flag is ignored.
+    * @param time Time, which is usually (depends on std library) count of seconds from 1970/01/01.
+    */
+    static derivedSyncClass from_tm(tm time) {
+        date_time_s dt_s;
+        dt_s.hours = time.tm_hour;
+        dt_s.minutes = time.tm_min;
+        dt_s.seconds = time.tm_sec;
+
+        dt_s.year = time.tm_year + 1900; //TODO maybe this is not true on ESP32/ESP8266 - test
+        dt_s.month = time.tm_mon + 1;
+        dt_s.day = time.tm_mday;
+
+        return derivedSyncClass(time);
     }
 
 protected:
@@ -1163,108 +1266,6 @@ public:
     int64_t getMicrosecondsOfDay() const {
         return dtlib::getMicrosOfDayFromRaw(DateTimeBase<derivedSyncClass>::getRawTime());
     }
-
-    /**
-    * @brief Gets Unix time, which is count of seconds from 1970/01/01.
-    */
-    inline int64_t getUnix() const {
-        return (DateTimeBase<derivedSyncClass>::getRawTime() - 62135596800000000LL)/SECOND;
-    }
-
-    /**
-    * @brief Factory method, which creates DateTime instance from Unix time.
-    * @note Microseconds and milliseconds fields will be set to 0.
-    * @param unixTime Unix time, which is count of seconds from 1970/01/01.
-    */
-    static derivedSyncClass fromUnix(int64_t unixTime) {
-        unixTime = (unixTime * SECOND) + 62135596800000000LL;
-        return derivedSyncClass(unixTime);
-    }
-
-    /**
-    * @brief Gets Date and Time represented as OLE Automation date.
-    */
-    inline double getOADate() const {
-        return ((double)(*this - OABase.getRaw())) / DAY;
-    }
-
-    /**
-    * @brief Factory method, which creates DateTime instance from OADate.
-    * @param OADate Date and time represented as an OLE Automation date.
-    */
-    static derivedSyncClass fromOADate(double OADate) {
-        int64_t rawVal = (OADate * DAY);
-        rawVal += OABase.getRaw();
-        return derivedSyncClass(rawVal);
-    }
-
-    /**
-    * @brief Gets time_t time, which is usually (depends on std library) count of seconds from 1970/01/01.
-    */
-    inline time_t get_time_t() const {
-        return (DateTimeBase<derivedSyncClass>::getRawTime() - 62135596800000000LL) / (SECOND / CLOCKS_PER_SEC);
-    }
-
-    /**
-    * @brief Factory method, which creates DateTime instance from time_t.
-    * @note Microseconds and milliseconds fields will be set to 0.
-    * @param time Time, which is usually (depends on std library) count of seconds from 1970/01/01.
-    */
-    static derivedSyncClass from_time_t(time_t time) {
-        time = (time * (SECOND / CLOCKS_PER_SEC)) + 62135596800000000LL;
-        return derivedSyncClass(time);
-    }
-
-    /**
-    * @brief Gets tm time structure.
-    */
-    tm get_tm() const {
-        DateTime_DST_tuple tup;
-        if constexpr (has_getDateTimeEnh<derivedSyncClass>::value) {
-            tup = static_cast<const derivedSyncClass*>(this)->getDateTimeEnh(); //getting DateTime with isDST flag at same time
-        }
-        else {
-            if constexpr (has_isDST<derivedSyncClass>::value) {
-                tup.isDST = static_cast<const derivedSyncClass*>(this)->isDST();
-            }
-            else {
-                tup.isDST = false;
-            }
-            tup.value = DateTimeBase<derivedSyncClass>::getRawTime();
-        }
-        date_time_s dt_s = dtlib::rawToDateTime(tup.value);
-        tm t;
-        t.tm_isdst = tup.isDST;
-        t.tm_hour = dt_s.hours;
-        t.tm_min = dt_s.minutes;
-        t.tm_sec = dt_s.seconds;
-        t.tm_year = 1900 - dt_s.year;
-        t.tm_mon = (int8_t)dt_s.month - 1;
-        t.tm_mday = dt_s.day;
-        t.tm_wday = (int8_t)dt_s.dayOfWeek - 1;
-        bool isLeap = dtlib::isLeapYear(dt_s.year);
-        t.tm_yday = dtlib::getDayOfYearFromMonth(dt_s.month, isLeap) + dt_s.day - 1;
-        return t;
-    }
-
-    /**
-    * @brief Factory method, which creates DateTime instance from tm structure.
-    * @note Microseconds and milliseconds fields will be set to 0.
-    * @warning tm_isdst flag is ignored.
-    * @param time Time, which is usually (depends on std library) count of seconds from 1970/01/01.
-    */
-    static derivedSyncClass from_tm(tm time) {
-        date_time_s dt_s;
-        dt_s.hours = time.tm_hour;
-        dt_s.minutes = time.tm_min;
-        dt_s.seconds = time.tm_sec;
-
-        dt_s.year = time.tm_year + 1900;
-        dt_s.month = time.tm_mon + 1;
-        dt_s.day = time.tm_mday;
-
-        return derivedSyncClass(time);
-    }
     
     /**
     * @brief Converts DateTime to string.
@@ -1331,7 +1332,7 @@ public:
     * | "Z"                  | Time zone and DST offset in hours from UTC, with no leading zeros.                        | 2009-06-15T13:45:30 GMT-07:00 DST+01:00-\> -6                                                 |
     * | "ZZ"                 | Time zone and DST offset in hours from UTC, with a leading zero for a single-digit value. | 2009-06-15T13:45:30 GMT-07:00 DST+01:00-\> -06                                                |
     * | "ZZZ"                | Time zone and DST offset in hours and minutes with ':' from UTC                           | 2009-06-15T13:45:30 GMT-07:00 DST+01:00-\> -06:00                                             |
-    * | "ZZZ"                | Time zone and DST offset in hours and minutes from UTC                                    | 2009-06-15T13:45:30 GMT-07:00 DST+01:00-\> -0600                                              |
+    * | "ZZZZ"               | Time zone and DST offset in hours and minutes from UTC                                    | 2009-06-15T13:45:30 GMT-07:00 DST+01:00-\> -0600                                              |
     * | "string" or 'string' | Literal string delimiter.                                                                 | 2009-06-15T13:45:30 ("arr:" h:m t) -\> arr: 1:45 P                                            |
     * | "\"                  | The escape character.                                                                     | 2009-06-15T13:45:30 (h \h) -\> 1 h                                                            |
     * | Any other character  | The character is copied to the result string unchanged.                                   | 2009-06-15T01:45:30 (arr hh:mm t) -\> arr 01:45 A                                             |
@@ -1416,7 +1417,7 @@ public:
     * | "Z"                  | Time zone and DST offset in hours from UTC, with no leading zeros.                        | 2009-06-15T13:45:30 GMT-07:00 DST+01:00-\> -6                                                 |
     * | "ZZ"                 | Time zone and DST offset in hours from UTC, with a leading zero for a single-digit value. | 2009-06-15T13:45:30 GMT-07:00 DST+01:00-\> -06                                                |
     * | "ZZZ"                | Time zone and DST offset in hours and minutes with ':' from UTC                           | 2009-06-15T13:45:30 GMT-07:00 DST+01:00-\> -06:00                                             |
-    * | "ZZZ"                | Time zone and DST offset in hours and minutes from UTC                                    | 2009-06-15T13:45:30 GMT-07:00 DST+01:00-\> -0600                                              |
+    * | "ZZZZ"               | Time zone and DST offset in hours and minutes from UTC                                    | 2009-06-15T13:45:30 GMT-07:00 DST+01:00-\> -0600                                              |
     * | "string" or 'string' | Literal string delimiter.                                                                 | 2009-06-15T13:45:30 ("arr:" h:m t) -\> arr: 1:45 P                                            |
     * | "\"                  | The escape character.                                                                     | 2009-06-15T13:45:30 (h \h) -\> 1 h                                                            |
     * | Any other character  | The character is copied to the result string unchanged.                                   | 2009-06-15T01:45:30 (arr hh:mm t) -\> arr 01:45 A                                             |

@@ -1540,17 +1540,17 @@ public:
 	DSTAdjustment DST;
 
 	/**
-	* @brief Name of time zone without DST. On windows it can be translated to system language.
+	* @brief Name of time zone without DST. On Windows it can be translated to system language.
 	*/
 	char standardName[TIME_ZONE_INFO_TZ_NAME_SIZE];
 	
 	/**
-	* @brief Name of time zone without DST. On windows it can be translated to system language.
+	* @brief Name of time zone with DST. On Windows it can be translated to system language.
 	*/
 	char daylightName[TIME_ZONE_INFO_TZ_NAME_SIZE];
 
 	/**
-	* @brief Key name of time zone (on Linux and Mac Olson name (e.g. "Europe/Paris") on Windows
+	* @brief Key name of time zone. On Linux and Mac Olson name (e.g. "Europe/Paris") on Windows
 	* Windows time zone name (e.g. "Standard European Time").
 	*/
 	char keyName[TIME_ZONE_INFO_TZ_NAME_SIZE];
