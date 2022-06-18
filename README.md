@@ -125,6 +125,125 @@ A `TimeSpan` is returned as result of some `DateTime` operators:
 + `DateTime + TimeSpan = DateTime`
 + `DateTime - TimeSpan = DateTime`
 
+#### Converting TimeSpan to string or char array
+`TimeSpan` can be also converted to string or char array same as `DateTime`, but it has slightly different format specifiers:
+| Format specifier     | Description                                                                                            | Example                                                                                    |
+|----------------------|--------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------|
+| "d"                  | The absolute number of whole days in the time interval.                                                | 1012d 12:30:21 -> 1012<br>-10d 12:30:21 -> 10                                              |
+| "dd" - "dddddddd"    | The absolute number of whole days in the time interval, padded with leading zeros as needed.           | for ddddd: -1012d 12:30:21 -> 01012<br>0d 12:30:21 -> 0                                    |
+| "f"                  | The tenths of a second in a TimeSpan value. This value is always positive.                             | 1012d 12:30:21.6170000 -> 6<br>1012d 12:30:21.04 -> 0                                      |
+| "ff"                 | The hundredths of a second in a TimeSpan value. This value is always positive.                         | 1012d 12:30:21.6170000 -> 62<br>1012d 12:30:21.0040000 -> 00                               |
+| "fff"                | The milliseconds in a TimeSpan value. This value is always positive.                                   | 1012d 12:30:21.6170000 -> 617<br>1012d 12:30:21.0004000 -> 000                             |
+| "ffff"               | The ten thousandths of a second in a TimeSpan value. This value is always positive.                    | 1012d 12:30:21.6175000 -> 6175<br>1012d 12:30:21.0000400 -> 0000                           |
+| "fffff"              | The hundred thousandths of a second in a TimeSpan value. This value is always positive.                | 1012d 12:30:21.6175400 -> 61754<br>1012d 12:30:21.0000040 -> 00000                         |
+| "ffffff"             | The millionths of a second in a TimeSpan value. This value is always positive.                         | 1012d 12:30:21.6175420 -> 617542<br>1012d 12:30:21.0000004 -> 000000                       |
+| "F"                  | If non-zero, the tenths of a second in a TimeSpan value. This value is always positive.                | 1012d 12:30:21.6170000 -> 6<br>1012d 12:30:21.0400000 -> 0                                 |
+| "FF"                 | If non-zero, the hundredths of a second in a TimeSpan value. This value is always positive.            | 1012d 12:30:21.6170000 -> 62<br>1012d 12:30:21.0040000 -> 0                                |
+| "FFF"                | If non-zero, the milliseconds in a TimeSpan value. This value is always positive.                      | 1012d 12:30:21.6170000 -> 617<br>1012d 12:30:21.0004000 -> 0                               |
+| "FFFF"               | If non-zero, the ten thousandths of a second in a TimeSpan value. This value is always positive.       | 1012d 12:30:21.6175000 -> 6175<br>1012d 12:30:21.0000400 -> 0                              |
+| "FFFFF"              | If non-zero, the hundred thousandths of a second in a TimeSpan value. This value is always positive.   | 1012d 12:30:21.6175400 -> 61754<br>1012d 12:30:21.0000040 -> 0                             |
+| "FFFFFF"             | If non-zero, the millionths of a second in a TimeSpan value. This value is always positive.            | 1012d 12:30:21.6175420 -> 617542<br>1012d 12:30:21.0000004 -> 0                            |
+| "h"                  | The hour, using a 24-hour clock from 0 to 23. This value is always positive.                           | 1012d 13:30:21 -> 13<br>1012d 2:30:21 -> 2                                                 |
+| "hh"                 | The hour, using a 24-hour clock from 00 to 23. This value is always positive.                          | 1012d 13:30:21 -> 13<br>1012d 2:30:21 -> 02                                                |
+| "i"                  | The milliseconds, from 0 through 999. This value is always positive.                                   | 1012d 12:30:21.0175420 -> 18<br>2009-06-15T13:45:30.0002420 -> 0                           |
+| "iii"                | The milliseconds, from 000 through 999. This value is always positive.                                 | 1012d 12:30:21.6175420 -> 618<br>2009-06-15T13:45:30.0002420 -> 000                        |
+| "n"                  | Sign character. Both + and - are shown.                                                                | 1012d 12:30:21 -> +<br>-1012d 12:30:21 -> -                                                |
+| "N"                  | Sign character. Only minus sign is shown.                                                              | 1012d 12:30:21 -> (nothing)<br>-1012d 12:30:21 -> -                                        |
+| "m"                  | The minute, from 0 through 59. This value is always positive.                                          | 1012d 1:05:01.0170420 -> 5<br>1012d 1:29:01 -> 29                                          |
+| "mm"                 | The minute, from 00 through 59. This value is always positive.                                         | 1012d 1:05:01.0170420 -> 05<br>1012d 1:29:01 -> 29                                         |
+| "s"                  | The second, from 0 through 59. This value is always positive.                                          | 1012d 1:05:01.0170420 -> 1                                                                 |
+| "ss"                 | The second, from 00 through 59. This value is always positive.                                         | 1012d 1:05:01.0170420 -> 01                                                                |
+| "u"                  | The microseconds, from 0 through 999. This value is always positive.                                   | 1012d 1:45:21.0170420 -> 42<br>1012d 1:45:21.6780004 -> 0                                  |
+| "uuu"                | The microseconds, from 000 through 999. This value is always positive.                                 | 1012d 1:45:21.0170420 -> 042<br>1012d 1:45:21.6780004 -> 000                               |
+| "string" or 'string' | Literal string delimiter.                                                                              | 1012d 1:45:21 ("arr:" h:m t) -> arr: 1:45                                                  |
+| "\"                  | The escape character.                                                                                  | 1012d 12:30:21 (h \h) -> 12 h                                                              |
+| Any other character  | The character is copied to the result string unchanged.                                                | 1012d 12:30:21 (arr hh:mm) -> arr 12:30                                                    |
+
+Format specifiers "f", "F", "y" has not limited maximum count, but other specifiers specified in table above has limited maximum counts.
+
+Parsing is not supported for `TimeSpan` yet.
+
+### DateTime and TimeSpan operators
+#### Conversion operators
+All `DateTime` instances can be converted to each other, but each conversion behaves differently:
+```
+DateTime -> DateTime                   - [implicit] date and time fields are copied
+DateTime -> DateTimeSysSync            - [implicit] date and time fields are copied and time will be constantly updating
+DateTime -> DateTimeTZ                 - [implicit] date and time fields are copied and UTC time zone is set
+DateTime -> DateTimeTZSysSync          - [implicit] date and time fields are copied, UTC time zone is set and time will be constantly updating
+DateTimeSysSync -> DateTime            - [explicit] time is captured and copied to DateTime
+DateTimeSysSync -> DateTimeSysSync     - [implicit] copies date and time fields and synchronizes it, so it will have exactly same value
+DateTimeSysSync -> DateTimeTZ          - [explicit] same as conversion to DateTime, but time zone is set to UTC
+DateTimeSysSync -> DateTimeTZSysSync   - [implicit] copies date and time fields and synchronizes it, so it will have exactly same value. Time zone is set to UTC
+DateTimeTZ -> DateTime                 - [explicit] local date and time fields are copied
+DateTimeTZ -> DateTimeSysSync          - [explicit] local date and time fields are copied and time will be constantly updating
+DateTimeTZ -> DateTimeTZ               - [implicit] date and time fields with time zone are copied
+DateTimeTZ -> DateTimeTZSysSync        - [implicit] date and time fields with time zone are copied and time will be constantly updating
+DateTimeTZSysSync -> DateTime          - [explicit] local time is captured and copied to DateTime
+DateTimeTZSysSync -> DateTimeSysSync   - [explicit] copies local date and time fields and synchronizes it, so it will have exactly same value
+DateTimeTZSysSync -> DateTimeTZ        - [explicit] same as conversion to DateTime, but also time zone is copied
+DateTimeTZSysSync -> DateTimeTZSysSync - [implicit] copies date and time fields with time zone and synchronizes it, so it will have exactly same value
+```
+Conversion from `DateTimeSysSync` (or `DateTimeTZSysSync`) to `DateTime` (or `DateTimeTZ`) can be used to capture current time. It can be used for example for measuring duration of some event:
+```
+DateTimeSysSync clock = DateTimeSysSync::now(); //Synchronizes time with OS, cannot be used with Arduino
+DateTime start = (DateTime)clock;
+
+//Some event, which duration will be measured
+
+DateTime end = (DateTime)clock;
+TimeSpan duration = end - start; //Duration of event
+```
+
+#### Arithmetic operators
+All `DateTime` instances (`DateTimeSysSync`, `DateTimeTZ`, `DateTimeTZSysSync`) supports those arithmetic operators:
+```
+DateTime - DateTime = TimeSpan
+DateTime + TimeSpan = DateTime //+= can be used too
+DateTime + int64_t  = DateTime //+= can be used too
+DateTime - TimeSpan = DateTime //-= can be used too
+DateTime - int64_t  = DateTime //-= can be used too
+DateTime++
+DateTime--
+
+DateTimeSysSync - DateTimeSysSync = TimeSpan
+DateTimeSysSync + TimeSpan = DateTimeSysSync //+= can be used too
+...
+```
+Oprators can also combine different types of `DateTime` instances, for example:
+```
+DateTimeSysSync - DateTime = TimeSpan
+DateTimeTZ - DateTime = TimeSpan
+...
+```
+Result of arithmetic or comparison operators when combining different types of `DateTime` instances can be different when:
++ **both** subtracted types contains time zone (`DateTimeTZ` and `DateTimeTZSysSync`) time is converted to UTC first and after that subtraction is done,
++ **only one** subtracted type contains time zone (`DateTimeTZ` and `DateTimeTZSysSync`) local time is used during subtraction.
+
+#### Comparison operators
+All `DateTime` instances (`DateTimeSysSync`, `DateTimeTZ`, `DateTimeTZSysSync`) supports those comparison operators:
+```
+DateTime == DateTime
+DateTime != DateTime
+DateTime > DateTime
+DateTime < DateTime
+DateTime >= DateTime
+DateTime <= DateTime
+
+DateTimeSysSync == DateTimeSysSync
+DateTimeSysSync != DateTimeSysSync
+...
+```
+Oprators can also combine different types of `DateTime` instances, for example:
+```
+DateTimeSysSync == DateTime
+DateTimeTZ != DateTime
+...
+```
+Result of arithmetic or comparison operators when combining different types of `DateTime` instances can be different when:
++ **both** compared types contains time zone (`DateTimeTZ` and `DateTimeTZSysSync`) time is converted to UTC first and after that comparison is done,
++ **only one** compared type contains time zone (`DateTimeTZ` and `DateTimeTZSysSync`) local time is used during comparison.
+
 ### Time zone and DST adjustment
 The following related classes are defined in this library:
 + `TimeZone` - represents time zone offset from UTC (negative to west, positive to east). Offset is represented with resolution of 15 minutes.
@@ -152,10 +271,11 @@ The following related classes are defined in this library:
 - [x] TimeSpan
 - [x] TimeZone and DSTAdjustment
 - [x] TimeZoneInfo and POSIX time zone
-- [ ] Conversions and operators
+- [x] Conversions and operators
 - [ ] Examples (operators, capturing time from SysSync, ...)
 - [x] Formatting and parsing
 - [ ] Leap seconds are unsupported
+- [ ] atomicity
 - [ ] Prepared for extensions (RTC, GPS time, ...)
 - [ ] Static polymorphism and UML class diagram
 - [ ] Reference to WorldTimeAPI and NTPClient class.
