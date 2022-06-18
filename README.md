@@ -11,28 +11,42 @@ with Arduino. This library is an enhanced version of the [DateTime](https://gith
 - **Arduino**
 
 ## Usage
-The following classes are defined in this library:
-+ `DateTime` - can store date and time from year 292277 B.C. to 292277 A.D. with a resolution in microseconds.
+### Date and time
+The following date and time classes are defined in this library:
++ `DateTime` - can store date and time from year 292277 B.C. (macro `MIN_YEAR`) to 292277 A.D. (macro `MAX_YEAR`) with a resolution in microseconds. Date and time
+is stored as count of microseconds from start of the epoch. This value is stored as 64 bit signed number.
 + `DateTimeSysSync` - acts as clock, which are synchronized with system clock. It's value is constantly updating.
 + `DateTimeTZ` - same as `DateTime`, but stores time zone and DST(daylight saving time) offsets. It also stores DST adjustments
 rules. Every time, when DateTime value is set or (de)incremented, DST adjustment rules are checked and time is adjusted if needed.
 + `DateTimeTZSysSync` - same as `DateTimeTZ` and `DateTimeSysSync`, but DST adjustment is also checked, when any date or time field
 is read. For better performance, every time DST is adjusted, next adjustment day is calculated. After that, it only checks, if
-the day, when adjustment need to be done, is over or not. Because functions for reading date or time fields are marked with `const` keyword,
+the day, when DST adjustment need to be done, is over or not. Because functions for reading date or time fields are marked with `const` keyword,
 next adjustment day cannot be calculated inside getters, but only checked. That's why `recalcDST()` function should be called
-at least once per day (or for better performance more often). `recalcDST()` function checks DST adjustment only if next adjustment
-day is over. When next adjustment day is over, `recalcDST()` was not called yet and some getter is called, offset of next DST period
-is added to the result. Thanks this, correct value will be returned even, if `recalcDST()` was not called, but this will be true only until
-next adjustment.
+at least once per period or for better performance more often. `recalcDST()` function checks DST adjustment only if next adjustment
+day is over, that's why it can be called in main loop. When next adjustment day is over, `recalcDST()` was not called yet and some
+getter is called, offset of next DST period is added to the result. Thanks this, correct value will be returned even, if `recalcDST()`
+was not called, but this will be true only until next adjustment. In table below, you can see the difference between two cases, when
+`recalcDST()` is never called and `recalcDST()` is called at least one time in period. At first DST adjustment, in both cases time is adjusted,
+but at second DST adjustment, only case, when `recalcDST()` is called is DST adjusted. That's because next DST adjustment was not established
+in `recalcDST()` function.
 ```
-period         |   DST         |                   NO DST                   |                 DST
+period         |   Summer      |                    Winter                  |               Summer
                |---------------|--------------------------------------------|------------------------->
 no recalcDST() | +1   +1   +1  | +0   +0   +0   +0   +0   +0   +0   +0   +0 | +0   +0   +0   +0   +0  
 recalcDST()    | +1   +1   +1  | +0   +0   +0   +0   +0   +0   +0   +0   +0 | +1   +1   +1   +1   +1  
 ```
 
+### Time span (duration)
+A `TimeSpan` class represents duration or offset. It works with same principle as `DateTime`, so duration is represented as count of microseconds.
+This value is stored in 64 bit signed integer. It's range is from -106,751,983 to 106,751,981 days. It is also defined in macros `MIN_DAYS` and `MAX_DAYS`.
+A `TimeSpan` is returned as result of some `DateTime` operators:
++ `DateTime - DateTime = TimeSpan`
++ `DateTime + TimeSpan = DateTime`
++ `DateTime - TimeSpan = DateTime`
+
+
 ## TODO
-- [ ] TimeSpan
+- [x] TimeSpan
 - [ ] TimeZone and DSTAdjustment
 - [ ] TimeZoneInfo and POSIX time zone
 - [ ] Conversions and operators
