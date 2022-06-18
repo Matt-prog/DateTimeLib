@@ -273,6 +273,7 @@ This library uses static polymorphism (no virtual methods, just templates) on Da
 + `DateTimeBase` - class, that specifies basic interface for all DateTime's. It does not specifies how date and time fields are stored, only specifies functions, that can convert date and time fields to raw 64-bit signed integer and basic arithmetic and comparison operators. This interface is prepared for RTC extension of current library.
 + `DateTimeRawBase` - class, that is derived from `DateTimeBase`, which can also store raw date and time value. It also defines all methods for `DateTime` class.
 + `DateTimeTZBase` - class, that is derived from `DateTimeRawBase`, which can also store time zone and DST adjustment and defines all methods for `DateTimeTZ` class.
+DateTime class diagram is located [here](docs/DateTime_class_diagram.png).
 
 ### Extensions
 As mentioned above, current DateTime library can be extended. For example if you want to create `DateTimeRTC` class, which will be wrapper for real time clock on MCU, you have to do this:
@@ -298,6 +299,7 @@ As mentioned above, current DateTime library can be extended. For example if you
 - [ ] Make possible conversions to/from chrono library classes.
 - [ ] Add conversions from/to Julian date.
 - [ ] Maybe add software alarm from old [DateTime](https://github.com/Matt-prog/DateTime) library.
+- [ ] Add more examples.
 
 ## Projects, which uses this library
 + [WorldTimeAPI client](https://github.com/Matt-prog/WorldTimeAPI) for Windows, Linux, Mac OS, ESP32 and ESP8266 implemented in C++ language.
@@ -312,19 +314,3 @@ Any contribution is appreciated.
 Copyright © 2022 [Matej Fitoš](https://github.com/Matt-prog).
 
 This project is [MIT](https://github.com/Matt-prog/WorldTimeAPI/blob/main/LICENSE) licensed.
-
-## TODO
-- [x] TimeSpan
-- [x] TimeZone and DSTAdjustment
-- [x] TimeZoneInfo and POSIX time zone
-- [x] Conversions and operators
-- [ ] Examples
-- [x] Formatting and parsing
-- [x] Leap seconds are unsupported
-- [ ] atomicity
-- [x] Prepared for extensions (RTC, GPS time, ...)
-- [ ] Static polymorphism and UML class diagram - add diagram to file
-- [ ] Reference to WorldTimeAPI class.
-- [ ] Difference between old and new DateTime
-- [ ] Make old DateTime deprecated.
-
