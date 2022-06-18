@@ -44,11 +44,33 @@ A `TimeSpan` is returned as result of some `DateTime` operators:
 + `DateTime + TimeSpan = DateTime`
 + `DateTime - TimeSpan = DateTime`
 
-
+### Time zone and DST adjustment
+The following related classes are defined in this library:
++ `TimeZone` - represents time zone offset from UTC (negative to west, positive to east). Offset is represented with resolution of 15 minutes.
++ `DSTTransitionRule` - represents one transition rule. There are 3 types of transition rule representation:
+  + **Floating** - commonly used type. Rule contains fields: *transition hour*, *transition month*, *week of month*, *day of week* and optionally *days offset*.
+  Example: *"Last sunday in March at 1:00"*.
+  + **Date** - exact date, when transition happend is specified. Rule contains fields: *transition hour*, *transition month*, *day of month* and optionally *days offset*. Example: *"The twentieth of March at 1:00"*. This type handles leap days.
+  + **Fixes** - zero based day number, when transition happens. Value can be from range 0 to 364. Rule contains fields: *transition hour*, *transition day of year*. Example: *"The first hundred day of year"*. This type does not handles leap days.
+  
+  All fields in transition rule has to be in local time, so they must have applied time zone offset and DST adjustment end rules must have applied DST offset. 
++ `DSTAdjustment` - contains start and end transition rule and DST offset.
++ `TimeZoneInfo` - contains all informations about current time zone. Fields:
+  + `timeZone` - time zone offset.
+  + `DST` - DST transition rules and offset.
+  + `standardName` - Name of time zone without DST. On Windows it can be translated to system language.
+  + `daylightName` - Name of time zone with DST. On Windows it can be translated to system language.
+  + `keyName` - Key name of time zone. On Linux and Mac Olson name (e.g. "Europe/Berlin") on Windows, Windows time zone name (e.g. "Standard European Time").
+  + `standardABR` - Abbreviation time zone name, for example: "CET".
+  + `daylightABR` - Abbreviation time zone name with DST, for example: "CEST".
+  
+  `TimeZoneInfo` can be converted to or parsed from POSIX time zone format. `standardABR` and `daylightABR` must not be empty before conversion. Parsing
+  won't update `keyName`, `standardName` and `daylightName` fields, because those are not specified in POSIX time zone format.
+  
 ## TODO
 - [x] TimeSpan
-- [ ] TimeZone and DSTAdjustment
-- [ ] TimeZoneInfo and POSIX time zone
+- [x] TimeZone and DSTAdjustment
+- [x] TimeZoneInfo and POSIX time zone
 - [ ] Conversions and operators
 - [ ] Examples (operators, capturing time from SysSync, ...)
 - [ ] Formatting and parsing
