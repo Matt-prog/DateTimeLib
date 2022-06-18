@@ -1,8 +1,8 @@
 # DateTimeLib
-Cross-platform library for processing date and time with time zone and daylight saving time. Only Gregorian calendar is supported.
+Cross-platform library for processing date and time with time zone and daylight saving time.
 The main advantage is that it works with a resolution in microseconds with wide range (years from 292277 B.C. to 292277 A.D.).
 During the design of this library, we tried to optimize it for speed and low RAM consumption, that's why it can be also used
-with Arduino. This library is an enhanced version of the [DateTime](https://github.com/Matt-prog/DateTime) which is deprecated.
+with Arduino. Only Gregorian calendar is supported. This library is an enhanced version of the [DateTime](https://github.com/Matt-prog/DateTime) which is deprecated.
 
 ## Supported OS/MCUs:
 - **Windows**
@@ -35,6 +35,7 @@ period         |   Summer      |                    Winter                  |   
 no recalcDST() | +1   +1   +1  | +0   +0   +0   +0   +0   +0   +0   +0   +0 | +0   +0   +0   +0   +0  
 recalcDST()    | +1   +1   +1  | +0   +0   +0   +0   +0   +0   +0   +0   +0 | +1   +1   +1   +1   +1  
 ```
+All `DateTime` instances does not supports leap seconds.
 
 #### Converting DateTime to string or char array
 Any `DateTime` instance can be converted to `string` (on Arduino to `String`) using member function called `toString()` or to char array using `toArray()`.
@@ -266,19 +267,64 @@ The following related classes are defined in this library:
   
   `TimeZoneInfo` can be converted to or parsed from POSIX time zone format. `standardABR` and `daylightABR` must not be empty before conversion. Parsing
   won't update `keyName`, `standardName` and `daylightName` fields, because those are not specified in POSIX time zone format.
-  
+
+## Class diagram of DateTime
+This library uses static polymorphism (no virtual methods, just templates) on DateTime classes. This system was chosen to achieve the best performance and extensibility. There are 3 main base classes, which was not mentioned yet:
++ `DateTimeBase` - class, that specifies basic interface for all DateTime's. It does not specifies how date and time fields are stored, only specifies functions, that can convert date and time fields to raw 64-bit signed integer and basic arithmetic and comparison operators. This interface is prepared for RTC extension of current library.
++ `DateTimeRawBase` - class, that is derived from `DateTimeBase`, which can also store raw date and time value. It also defines all methods for `DateTime` class.
++ `DateTimeTZBase` - class, that is derived from `DateTimeRawBase`, which can also store time zone and DST adjustment and defines all methods for `DateTimeTZ` class.
+
+### Extensions
+As mentioned above, current DateTime library can be extended. For example if you want to create `DateTimeRTC` class, which will be wrapper for real time clock on MCU, you have to do this:
+1. `DateTimeRTC` **must** contain functions:
+  + `int64_t getRawValueDer() const` - which reads all date and time fields from RTC and converts this time to raw 64-bit signed integer value. For conversion from date and time fields you can use `dtlib::dateTimeToRaw(date_time_s)` helper function.
+  + `void setRawValueDer(int64_t)` - which sets all date and time fields in RTC from raw 64-bit signed integer value. For conversion raw value to date and time fields you can use `dtlib::rawToDateTime(int64_t)` helper function.
+  + `void addRawValueDer(int64_t)` - which adds specified amount of microseconds to date and time. Both `dtlib::dateTimeToRaw(date_time_s)` and `dtlib::rawToDateTime(int64_t)` helper functions can be used.
+2. `DateTimeRTC` **may** contain functions to support time zone and DST:
+  + `void setRawTimeTD(int64_t)` - which sets raw value and checks DST adjustment.
+  + `void addRawTimeTD(int64_t)` - which adds value to raw value and checks DST adjustment.
+  + `int16_t getTimeZoneOffsetMinutes() const` - which gets time zone offset in minutes.
+  + `int16_t getCurrentDSTOffsetMinutes() const` - which gets current DST offset in minutes.
+3. You **must** specify all methods with same name and same paramters as `DateTimeRawBase`. To specify those methods, it is recommended to use helper functions from `dtlib` namespace from file `DateTimeHelpers.h`.
+4. If `DateTimeRTC` would also store time zone, `set()` member function has to be specified also for classes, whic has `int16_t getTimeZoneOffsetMinutes() const` and `int16_t getCurrentDSTOffsetMinutes() const` functions. For inspiration, you can see, how is it implemented in `DateTimeTZ.h` file.
+5. You **must** specify all constructors.
+
+## Future plans
+- [ ] Add `isDST` flags to `date_s`, `time_s`, `date_time_s` and make `DateTimeTZ` and `DateTimeTZSysSync` to accept it.
+- [ ] Make possible to get system time zone, time zone name and `DSTAdjustment` on Linux and Mac OS.
+- [ ] Make possigle to fill `TimeZoneInfo` with system time zone informations on Windows, Linux and Mac OS.
+- [ ] Make `now()`, `setSystemTime()`, `getSystemTZ()`, `getSystemDSTAdjustment()`, `setSystemTZ()`, `setSystemDSTAdjustment()` for ESP32 and ESP8266.
+- [ ] Make cooperation with espressif sntp library on for ESP32 and ESP8266.
+- [ ] Make possible conversions to/from chrono library classes.
+- [ ] Add conversions from/to Julian date.
+- [ ] Maybe add software alarm from old [DateTime](https://github.com/Matt-prog/DateTime) library.
+
+## Projects, which uses this library
++ [WorldTimeAPI client](https://github.com/Matt-prog/WorldTimeAPI) for Windows, Linux, Mac OS, ESP32 and ESP8266 implemented in C++ language.
+
+## Contribution
+Any contribution is appreciated.
+
+## Author
+👤 [Matej Fitoš](https://github.com/Matt-prog)
+
+## License
+Copyright © 2022 [Matej Fitoš](https://github.com/Matt-prog).
+
+This project is [MIT](https://github.com/Matt-prog/WorldTimeAPI/blob/main/LICENSE) licensed.
+
 ## TODO
 - [x] TimeSpan
 - [x] TimeZone and DSTAdjustment
 - [x] TimeZoneInfo and POSIX time zone
 - [x] Conversions and operators
-- [ ] Examples (operators, capturing time from SysSync, ...)
+- [ ] Examples
 - [x] Formatting and parsing
-- [ ] Leap seconds are unsupported
+- [x] Leap seconds are unsupported
 - [ ] atomicity
-- [ ] Prepared for extensions (RTC, GPS time, ...)
-- [ ] Static polymorphism and UML class diagram
-- [ ] Reference to WorldTimeAPI and NTPClient class.
-- [ ] Future plans (Retrieving system time zone and DST adjustment for Linux and Mac OS)
+- [x] Prepared for extensions (RTC, GPS time, ...)
+- [ ] Static polymorphism and UML class diagram - add diagram to file
+- [ ] Reference to WorldTimeAPI class.
 - [ ] Difference between old and new DateTime
 - [ ] Make old DateTime deprecated.
+
