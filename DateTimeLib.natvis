@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+	<Type Name="DateTimeRawBase&lt;*&gt;">
+		<!--Date and time calculation helper functions-->
+		<Intrinsic Name="getRaw" Expression="rawValue"/>
+		<Intrinsic Name="days" ReturnType="int32_t" Expression="(getRaw() &lt; 0) ? ((int32_t)(((getRaw()+1) / 86400000000LL) - 1)) : ((int32_t)(getRaw() / 86400000000LL))"/>
+		<Intrinsic Name="micr" ReturnType="int64_t" Expression="(getRaw() &lt; 0) ? (86400000000LL + ((getRaw()+1) % 86400000000LL) - 1) : (getRaw() % 86400000000LL)"/>
+		
+		<Intrinsic Name="years400" ReturnType="int32_t" Expression="(int32_t)(((rawValue &lt; 0) ? (days()+2) : (days()+365))/146097LL)"/>
+		<Intrinsic Name="years100" ReturnType="int32_t" Expression="(int32_t)((((rawValue &lt; 0) ? (days()+2) : (days()+365)) % 146097LL)/36524LL)"/>
+		<Intrinsic Name="years4" ReturnType="int32_t" Expression="(int32_t)(((((rawValue &lt; 0) ? (days()+2) : (days()+365)) % 146097LL) % 36524LL)/1461LL)"/>
+		<Intrinsic Name="years1" ReturnType="int32_t" Expression="(int32_t)((((((rawValue &lt; 0) ? (days()+2) : (days()+365)) % 146097LL) % 36524LL) % 1461LL)/365LL)"/>
+		<Intrinsic Name="dayOfYearRaw" ReturnType="int32_t" Expression="(int32_t)((((((rawValue &lt; 0) ? (days()+2) : (days()+365)) % 146097LL) % 36524LL) % 1461LL) % 365LL)"/>
+		<Intrinsic Name="monthComm" ReturnType="int32_t" Expression="(int32_t)((dayOfYear() &lt; 181) ? ((dayOfYear() &lt; 90) ? ((dayOfYear() &lt; 31) ? 1 : ((dayOfYear() &lt; 59) ? 2 : 3)) : ((dayOfYear() &lt; 120) ? 4 : ((dayOfYear() &lt; 151) ? 5 : 6))) : ((dayOfYear() &lt; 273) ? ((dayOfYear() &lt; 212) ? 7 : ((dayOfYear() &lt; 243) ? 8 : 9)) : ((dayOfYear() &lt; 304) ? 10 : ((dayOfYear() &lt; 334) ? 11 : 12))))"/>
+		<Intrinsic Name="monthLeap" ReturnType="int32_t" Expression="(int32_t)((dayOfYear() &lt; 182) ? ((dayOfYear() &lt; 91) ? ((dayOfYear() &lt; 31) ? 1 : ((dayOfYear() &lt; 60) ? 2 : 3)) : ((dayOfYear() &lt; 121) ? 4 : ((dayOfYear() &lt; 152) ? 5 : 6))) : ((dayOfYear() &lt; 274) ? ((dayOfYear() &lt; 213) ? 7 : ((dayOfYear() &lt; 244) ? 8 : 9)) : ((dayOfYear() &lt; 305) ? 10 : ((dayOfYear() &lt; 335) ? 11 : 12))))"/>
+		<Intrinsic Name="dayOfMonthComm" ReturnType="int32_t" Expression="(int32_t)((dayOfYear() &lt; 181) ? ((dayOfYear() &lt; 90) ? ((dayOfYear() &lt; 31) ? (dayOfYear()+1) : ((dayOfYear() &lt; 59) ? (dayOfYear() - 30) : (dayOfYear() - 58))) : ((dayOfYear() &lt; 120) ? (dayOfYear() - 89) : ((dayOfYear() &lt; 151) ? (dayOfYear() - 119) : (dayOfYear() - 150)))) : ((dayOfYear() &lt; 273) ? ((dayOfYear() &lt; 212) ? (dayOfYear() - 180) : ((dayOfYear() &lt; 243) ? (dayOfYear() - 211) : (dayOfYear() - 242))) : ((dayOfYear() &lt; 304) ? (dayOfYear() - 272) : ((dayOfYear() &lt; 334) ? (dayOfYear() - 303) : (dayOfYear() - 333)))))"/>
+		<Intrinsic Name="dayOfMonthLeap" ReturnType="int32_t" Expression="(int32_t)((dayOfYear() &lt; 182) ? ((dayOfYear() &lt; 91) ? ((dayOfYear() &lt; 31) ? (dayOfYear()+1) : ((dayOfYear() &lt; 60) ? (dayOfYear() - 30) : (dayOfYear() - 59))) : ((dayOfYear() &lt; 121) ? (dayOfYear() - 90) : ((dayOfYear() &lt; 152) ? (dayOfYear() - 120) : (dayOfYear() - 151)))) : ((dayOfYear() &lt; 274) ? ((dayOfYear() &lt; 213) ? (dayOfYear() - 181) : ((dayOfYear() &lt; 244) ? (dayOfYear() - 212) : (dayOfYear() - 243))) : ((dayOfYear() &lt; 305) ? (dayOfYear() - 273) : ((dayOfYear() &lt; 335) ? (dayOfYear() - 304) : (dayOfYear() - 334)))))"/>
+		
+		<!--Time calculation-->
+		<Intrinsic Name="hrs" ReturnType="int" Expression="(int)(micr() / 3600000000LL)"/>
+		<Intrinsic Name="mins" ReturnType="int" Expression="(int)((micr() % 3600000000LL) / 60000000LL)"/>
+		<Intrinsic Name="secs" ReturnType="int" Expression="(int)((micr() % 60000000LL) / 1000000LL)"/>
+		<Intrinsic Name="millis" ReturnType="int" Expression="(int)((micr() % 1000000LL) / 1000LL)"/>
+		<Intrinsic Name="micros" ReturnType="int" Expression="(int)(micr() % 1000LL)"/>
+		<Intrinsic Name="secFract" ReturnType="int" Expression="(int)(millis()*1000+micros())"/>
+
+		<!--Date calculation-->
+		<Intrinsic Name="years" ReturnType="int32_t" Expression="(int32_t)(years400() * 400 + years100() * 100 + years4() * 4 + years1() - (rawValue &lt; 0))"/>
+		<Intrinsic Name="month" ReturnType="int32_t" Expression="(isLeap()) ? monthLeap() : monthComm()"/>
+		<Intrinsic Name="dayOfMonth" ReturnType="int32_t" Expression="(isLeap()) ? dayOfMonthLeap() : dayOfMonthComm()"/>
+		<Intrinsic Name="dayOfWeek" ReturnType="DayOfWeek::Day" Expression="(DayOfWeek::Day)((getRaw() &lt; 0) ? (7 + ((days() - 5) % 7)) : (((days() + 1) % 7) + 1))"/>
+		
+		<Intrinsic Name="isLeap" ReturnType="bool" Expression="years1() == 0 &#38;&#38; (years4() != 0 || years100() == 0)"/>
+		<Intrinsic Name="dayOfYear" ReturnType="int32_t" Expression="(int32_t)((rawValue &lt; 0) ? (dayOfYearRaw()+364) : (dayOfYearRaw()+isLeap()))"/>
+		
+		<!--Formatting functions-->
+		<Intrinsic Name="monthDig_" Expression="month()%10"/>
+		<Intrinsic Name="monthDig__" Expression="(month()/10)%10"/>
+		
+		<Intrinsic Name="dayOfMonthDig_" Expression="dayOfMonth()%10"/>
+		<Intrinsic Name="dayOfMonthDig__" Expression="(dayOfMonth()/10)%10"/>
+		
+		<Intrinsic Name="hrsDig_" Expression="hrs()%10"/>
+		<Intrinsic Name="hrsDig__" Expression="(hrs()/10)%10"/>
+		
+		<Intrinsic Name="minsDig_" Expression="mins()%10"/>
+		<Intrinsic Name="minsDig__" Expression="(mins()/10)%10"/>
+		
+		<Intrinsic Name="secsDig_" Expression="secs()%10"/>
+		<Intrinsic Name="secsDig__" Expression="(secs()/10)%10"/>
+		
+		<Intrinsic Name="fractDig_" Expression="secFract()%10"/>
+		<Intrinsic Name="fractDig__" Expression="(secFract()/10)%10"/>
+		<Intrinsic Name="fractDig___" Expression="(secFract()/100)%10"/>
+		<Intrinsic Name="fractDig____" Expression="(secFract()/1000)%10"/>
+		<Intrinsic Name="fractDig_____" Expression="(secFract()/10000)%10"/>
+		<Intrinsic Name="fractDig______" Expression="(secFract()/100000)%10"/>
+		
+		<!--Time zone functions-->
+		<Intrinsic Name="getUTCOffsetTotalMinutes" Expression="(int)0"/>
+		<Intrinsic Name="getUTCOffsetTotalMinutes" Optional="true" Expression="getUTCOffsetTotalMinutesOpt()"/>
+		<Intrinsic Name="getUTCOffsetTotalMinutesOpt" Optional="true" Expression="(int)(((int)getInhClass()->tzInfo.timeZoneOffset15min)*15 + ((getInhClass()->adj.isDST_) ? (((int)getInhClass()->adj.DSTOffset15min)*15) : 0))"/>
+		<Intrinsic Name="getUTCOffsetMinutes" Expression="getUTCOffsetTotalMinutes()%60"/>
+		<Intrinsic Name="getUTCOffsetHours" Expression="getUTCOffsetTotalMinutes()/60"/>
+		
+		<Intrinsic Name="tzHrsDig_" Expression="abs((int)(getUTCOffsetHours()%10))"/>
+		<Intrinsic Name="tzHrsDig__" Expression="(int)((getUTCOffsetHours()/10)%10)"/>
+		
+		<Intrinsic Name="tzMinsDig_" Expression="abs((int)(getUTCOffsetMinutes()%10))"/>
+		<Intrinsic Name="tzMinsDig__" Expression="abs((int)((getUTCOffsetMinutes()/10)%10))"/>
+		
+		<!--Other helpers-->
+		<Intrinsic Name="getInhClass" Optional="true" Expression="static_cast&lt;$T1*&gt;(this)"/>
+		<Intrinsic Name="abs" Expression="(a &lt; 0) ? -a : a">
+			<Parameter Type="int" Name="a"/>
+		</Intrinsic>
+		
+		<!--Debug view-->
+		
+		<DisplayString Condition="getRaw() &gt;= 0 &#38;&#38; tzHrsDig__() &gt;= 0">{{{years()}-{monthDig__()}{monthDig_()}-{dayOfMonthDig__()}{dayOfMonthDig_()} {hrsDig__()}{hrsDig_()}:{minsDig__()}{minsDig_()}:{secsDig__()}{secsDig_()}.{fractDig______()}{fractDig_____()}{fractDig____()}{fractDig___()}{fractDig__()}{fractDig_()} +{tzHrsDig__()}{tzHrsDig_()}{tzMinsDig__()}{tzMinsDig_()}Z}}</DisplayString>
+		<DisplayString Condition="getRaw() &gt;= 0 &#38;&#38; tzHrsDig__() &lt; 0">{{{years()}-{monthDig__()}{monthDig_()}-{dayOfMonthDig__()}{dayOfMonthDig_()} {hrsDig__()}{hrsDig_()}:{minsDig__()}{minsDig_()}:{secsDig__()}{secsDig_()}.{fractDig______()}{fractDig_____()}{fractDig____()}{fractDig___()}{fractDig__()}{fractDig_()} {tzHrsDig__()}{tzHrsDig_()}{tzMinsDig__()}{tzMinsDig_()}Z}}</DisplayString>
+		<DisplayString Condition="getRaw() &lt; 0 &#38;&#38; tzHrsDig__() &gt;= 0">{{{years()}-{monthDig__()}{monthDig_()}-{dayOfMonthDig__()}{dayOfMonthDig_()} B.C. {hrsDig__()}{hrsDig_()}:{minsDig__()}{minsDig_()}:{secsDig__()}{secsDig_()}.{fractDig______()}{fractDig_____()}{fractDig____()}{fractDig___()}{fractDig__()}{fractDig_()} +{tzHrsDig__()}{tzHrsDig_()}{tzMinsDig__()}{tzMinsDig_()}Z}}</DisplayString>
+		<DisplayString Condition="getRaw() &lt; 0 &#38;&#38; tzHrsDig__() &lt; 0">{{{years()}-{monthDig__()}{monthDig_()}-{dayOfMonthDig__()}{dayOfMonthDig_()} B.C. {hrsDig__()}{hrsDig_()}:{minsDig__()}{minsDig_()}:{secsDig__()}{secsDig_()}.{fractDig______()}{fractDig_____()}{fractDig____()}{fractDig___()}{fractDig__()}{fractDig_()} {tzHrsDig__()}{tzHrsDig_()}{tzMinsDig__()}{tzMinsDig_()}Z}}</DisplayString>
+		
+		<Expand>
+			<Item Name="Year">years()</Item>
+			<Item Name="Month">(Month::MonthE)month()</Item>
+			<Item Name="Day">dayOfMonth()</Item>
+			<Item Name="Day of week">dayOfWeek()</Item>
+			
+			<Item Name="Hours">hrs()</Item>
+			<Item Name="Minutes">mins()</Item>
+			<Item Name="Seconds">secs()</Item>
+			<Item Name="Milliseconds">millis()</Item>
+			<Item Name="Microseconds">micros()</Item>
+			
+			<Item Name="Time zone (excluding DST)" Optional="true">getInhClass()->tzInfo</Item>
+			<Item Name="DST" Optional="true">getInhClass()->adj</Item>
+			<Synthetic Name="Total UTC offset">
+				<DisplayString Condition="tzHrsDig__() &gt;= 0">+{tzHrsDig__()}{tzHrsDig_()}{tzMinsDig__()}{tzMinsDig_()}Z</DisplayString>
+				<DisplayString Condition="tzHrsDig__() &lt; 0">{tzHrsDig__()}{tzHrsDig_()}{tzMinsDig__()}{tzMinsDig_()}Z</DisplayString>
+			</Synthetic>
+			<Item Name="syncTime" Optional="true">getInhClass()->syncTime</Item>
+			<Item Name="nextDSTTransitionDT" Optional="true">getInhClass()->nextDSTTransitionDT</Item>
+		
+			<Synthetic Name="Extras">
+				<Expand>
+					<Item Name="Is leap">isLeap()</Item>
+					<Item Name="Epoch" Condition="getRaw() &lt; 0">"B.C."</Item>
+					<Item Name="Epoch" Condition="getRaw() &gt;= 0">"A.D."</Item>
+					<Item Name="Days since epoch">days()</Item>
+					<Item Name="Day of year">dayOfYear()</Item>
+					<Item Name="Raw value">getRaw()</Item>
+				</Expand>
+			</Synthetic>
+		</Expand>
+	</Type>
+
+	<Type Name="TimeSpan">
+		<!--Time calculation-->
+		<Intrinsic Name="days" ReturnType="int" Expression="(int)(raw_time / 86400000000LL)"/>
+		<Intrinsic Name="hrs" ReturnType="int" Expression="(int)((raw_time % 86400000000LL) / 3600000000LL)"/>
+		<Intrinsic Name="mins" ReturnType="int" Expression="(int)((raw_time % 3600000000LL) / 60000000LL)"/>
+		<Intrinsic Name="secs" ReturnType="int" Expression="(int)((raw_time % 60000000LL) / 1000000LL)"/>
+		<Intrinsic Name="millis" ReturnType="int" Expression="(int)((raw_time % 1000000LL) / 1000LL)"/>
+		<Intrinsic Name="micros" ReturnType="int" Expression="(int)(raw_time % 1000LL)"/>
+		<Intrinsic Name="secFract" ReturnType="int" Expression="(int)(millis()*1000+micros())"/>
+
+		<Intrinsic Name="daysAbs" ReturnType="int" Expression="abs(days())"/>
+		<Intrinsic Name="hrsAbs" ReturnType="int" Expression="abs(hrs())"/>
+		<Intrinsic Name="minsAbs" ReturnType="int" Expression="abs(mins())"/>
+		<Intrinsic Name="secsAbs" ReturnType="int" Expression="abs(secs())"/>
+		<Intrinsic Name="millisAbs" ReturnType="int" Expression="abs(millis())"/>
+		<Intrinsic Name="microsAbs" ReturnType="int" Expression="abs(micros())"/>
+		<Intrinsic Name="secFractAbs" ReturnType="int" Expression="abs(secFract())"/>
+
+		<!--Formatting functions-->
+		<Intrinsic Name="hrsDig_" Expression="hrsAbs()%10"/>
+		<Intrinsic Name="hrsDig__" Expression="(hrsAbs()/10)%10"/>
+
+		<Intrinsic Name="minsDig_" Expression="minsAbs()%10"/>
+		<Intrinsic Name="minsDig__" Expression="(minsAbs()/10)%10"/>
+
+		<Intrinsic Name="secsDig_" Expression="secsAbs()%10"/>
+		<Intrinsic Name="secsDig__" Expression="(secsAbs()/10)%10"/>
+
+		<Intrinsic Name="fractDig_" Expression="secFractAbs()%10"/>
+		<Intrinsic Name="fractDig__" Expression="(secFractAbs()/10)%10"/>
+		<Intrinsic Name="fractDig___" Expression="(secFractAbs()/100)%10"/>
+		<Intrinsic Name="fractDig____" Expression="(secFractAbs()/1000)%10"/>
+		<Intrinsic Name="fractDig_____" Expression="(secFractAbs()/10000)%10"/>
+		<Intrinsic Name="fractDig______" Expression="(secFractAbs()/100000)%10"/>
+
+		<!--Other helpers-->
+		<Intrinsic Name="abs" Expression="(a &lt; 0) ? -a : a">
+			<Parameter Type="int" Name="a"/>
+		</Intrinsic>
+
+		<!--Debug view-->
+
+		<DisplayString Condition="raw_time &gt;= 0">{{{daysAbs()}days {hrsDig__()}{hrsDig_()}:{minsDig__()}{minsDig_()}:{secsDig__()}{secsDig_()}.{fractDig______()}{fractDig_____()}{fractDig____()}{fractDig___()}{fractDig__()}{fractDig_()}}}</DisplayString>
+		<DisplayString Condition="raw_time &lt; 0">{{-{daysAbs()}days {hrsDig__()}{hrsDig_()}:{minsDig__()}{minsDig_()}:{secsDig__()}{secsDig_()}.{fractDig______()}{fractDig_____()}{fractDig____()}{fractDig___()}{fractDig__()}{fractDig_()}}}</DisplayString>
+
+		<Expand>
+			<Item Name="Days">days()</Item>
+			<Item Name="Hours">hrs()</Item>
+			<Item Name="Minutes">mins()</Item>
+			<Item Name="Seconds">secs()</Item>
+			<Item Name="Milliseconds">millis()</Item>
+			<Item Name="Microseconds">micros()</Item>
+		</Expand>
+	</Type>
+		
+		
+	<Type Name="DSTTransitionRule">
+		<DisplayString Condition="(rawValue &#38; 3) == 0">{{Type={(DSTTransitionRuleType)(rawValue &#38; 3)}, Transition rule="Zero based {(rawValue &gt;&gt; 2) &#38; 0x03FFU} day of year at {((rawValue &gt;&gt; 16) &#38; 0x3FU)}:00:00"}}</DisplayString>
+		<DisplayString Condition="(rawValue &#38; 3) == 1">{{Type={(DSTTransitionRuleType)(rawValue &#38; 3)}, Transition rule="On the {((rawValue &gt;&gt; 6) &#38; 0x3FU)}/{(Month::MonthE)((rawValue &gt;&gt; 2) &#38; 0x0FU)} (day/month) with an offset of {(rawValue &#38; 0x8000U) ? (-((int8_t)((rawValue &gt;&gt; 12) &#38; 0x07U))-1) : (int8_t)((rawValue &gt;&gt; 12) &#38; 0x07U)} days at {((rawValue &gt;&gt; 16) &#38; 0x3FU)}:00:00"}}</DisplayString>
+		<DisplayString Condition="(rawValue &#38; 3) == 2">{{Type={(DSTTransitionRuleType)(rawValue &#38; 3)}, Transition rule="{(WeekOfMonth)((rawValue &gt;&gt; 9) &#38; 0x07U)} {(DayOfWeek::Day)((rawValue &gt;&gt; 6) &#38; 0x07U)} in {(Month::MonthE)((rawValue &gt;&gt; 2) &#38; 0x0FU)} with an offset of {(rawValue &#38; 0x8000U) ? (-((int8_t)((rawValue &gt;&gt; 12) &#38; 0x07U))-1) : (int8_t)((rawValue &gt;&gt; 12) &#38; 0x07U)} days at {((rawValue &gt;&gt; 16) &#38; 0x3FU)}:00:00"}}</DisplayString>
+		<DisplayString Condition="(rawValue &#38; 3) == 3">{{Type={(DSTTransitionRuleType)(rawValue &#38; 3)}}}</DisplayString>
+		<Expand>
+			<Item Name="Type">(DSTTransitionRuleType)(rawValue &#38; 3)</Item>
+			<Item Name="Transition time [hours]" Condition="(rawValue &#38; 3) != 3">((rawValue &gt;&gt; 16) &#38; 0x3FU)</Item>
+			<Item Name="Day of year (zero based)" Condition="(rawValue &#38; 3) == 0">(rawValue &gt;&gt; 2) &#38; 0x03FFU</Item>
+			<Item Name="Month" Condition="(rawValue &#38; 3) == 1 || (rawValue &#38; 3) == 2">(Month::MonthE)((rawValue &gt;&gt; 2) &#38; 0x0FU)</Item>
+			<Item Name="Day" Condition="(rawValue &#38; 3) == 1">((rawValue &gt;&gt; 6) &#38; 0x3FU)</Item>
+			<Item Name="Day of week" Condition="(rawValue &#38; 3) == 2">(DayOfWeek::Day)((rawValue &gt;&gt; 6) &#38; 0x07U)</Item>
+			<Item Name="Week of month" Condition="(rawValue &#38; 3) == 2">(WeekOfMonth)((rawValue &gt;&gt; 9) &#38; 0x07U)</Item>
+			<Item Name="Days offset" Condition="(rawValue &#38; 3) == 1 || (rawValue &#38; 3) == 2">(rawValue &#38; 0x8000U) ? (-((int8_t)((rawValue &gt;&gt; 12) &#38; 0x07U))-1) : (int8_t)((rawValue &gt;&gt; 12) &#38; 0x07U)</Item>
+		</Expand>
+	</Type>
+	
+	<Type Name="TimeZone">
+		<DisplayString Condition="timeZoneOffset15min &gt;= 0 &#38;&#38; ((int8_t)timeZoneOffset15min)/4 &lt; 10 &#38;&#38; (((int8_t)timeZoneOffset15min)%4)*15 &lt; 10">{{GMT+0{((int8_t)timeZoneOffset15min)/4}:0{(((int8_t)timeZoneOffset15min)%4)*15}}}</DisplayString>
+		<DisplayString Condition="timeZoneOffset15min &gt;= 0 &#38;&#38; ((int8_t)timeZoneOffset15min)/4 &lt; 10 &#38;&#38; !((((int8_t)timeZoneOffset15min)%4)*15 &lt; 10)">{{GMT+0{((int8_t)timeZoneOffset15min)/4}:{(((int8_t)timeZoneOffset15min)%4)*15}}}</DisplayString>
+		<DisplayString Condition="timeZoneOffset15min &gt;= 0 &#38;&#38; !(((int8_t)timeZoneOffset15min)/4 &lt; 10) &#38;&#38; (((int8_t)timeZoneOffset15min)%4)*15 &lt; 10">{{GMT+{((int8_t)timeZoneOffset15min)/4}:0{(((int8_t)timeZoneOffset15min)%4)*15}}}</DisplayString>
+		<DisplayString Condition="timeZoneOffset15min &gt;= 0 &#38;&#38; !(((int8_t)timeZoneOffset15min)/4 &lt; 10) &#38;&#38; !((((int8_t)timeZoneOffset15min)%4)*15 &lt; 10)">{{GMT+{((int8_t)timeZoneOffset15min)/4}:{(((int8_t)timeZoneOffset15min)%4)*15}}}</DisplayString>
+
+		<DisplayString Condition="timeZoneOffset15min &lt; 0 &#38;&#38; ((int8_t)timeZoneOffset15min)/4 &gt; -10 &#38;&#38; (((int8_t)timeZoneOffset15min)%4)*15 &gt; -10">{{GMT-0{-(((int8_t)timeZoneOffset15min)/4)}:0{-((((int8_t)timeZoneOffset15min)%4)*15)}}}</DisplayString>
+		<DisplayString Condition="timeZoneOffset15min &lt; 0 &#38;&#38; ((int8_t)timeZoneOffset15min)/4 &gt; -10 &#38;&#38; !((((int8_t)timeZoneOffset15min)%4)*15 &gt; -10)">{{GMT-0{-(((int8_t)timeZoneOffset15min)/4)}:{-((((int8_t)timeZoneOffset15min)%4)*15)}}}</DisplayString>
+		<DisplayString Condition="timeZoneOffset15min &lt; 0 &#38;&#38; !(((int8_t)timeZoneOffset15min)/4 &gt; -10) &#38;&#38; (((int8_t)timeZoneOffset15min)%4)*15 &gt; -10">{{GMT-{-(((int8_t)timeZoneOffset15min)/4)}:0{-((((int8_t)timeZoneOffset15min)%4)*15)}}}</DisplayString>
+		<DisplayString Condition="timeZoneOffset15min &lt; 0 &#38;&#38; !(((int8_t)timeZoneOffset15min)/4 &gt; -10) &#38;&#38; !((((int8_t)timeZoneOffset15min)%4)*15 &gt; -10)">{{GMT-{-(((int8_t)timeZoneOffset15min)/4)}:{-((((int8_t)timeZoneOffset15min)%4)*15)}}}</DisplayString>
+		<Expand>
+			<Item Name="Time zone">(TimeZones::TimeZoneName)timeZoneOffset15min</Item>
+			<Item Name="Hours offset">((int8_t)timeZoneOffset15min)/4</Item>
+			<Item Name="Minutes offset">(((int8_t)timeZoneOffset15min)%4)*15</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="DSTAdjustment">
+		<DisplayString Condition="DSTOffset15min &gt;= 0 &#38;&#38; ((int8_t)DSTOffset15min)/4 &lt; 10 &#38;&#38; (((int8_t)DSTOffset15min)%4)*15 &lt; 10">{{DST offset: GMT+0{((int8_t)DSTOffset15min)/4}:0{(((int8_t)DSTOffset15min)%4)*15}}}</DisplayString>
+		<DisplayString Condition="DSTOffset15min &gt;= 0 &#38;&#38; ((int8_t)DSTOffset15min)/4 &lt; 10 &#38;&#38; !((((int8_t)DSTOffset15min)%4)*15 &lt; 10)">{{DST offset: GMT+0{((int8_t)DSTOffset15min)/4}:{(((int8_t)DSTOffset15min)%4)*15}}}</DisplayString>
+		<DisplayString Condition="DSTOffset15min &gt;= 0 &#38;&#38; !(((int8_t)DSTOffset15min)/4 &lt; 10) &#38;&#38; (((int8_t)DSTOffset15min)%4)*15 &lt; 10">{{DST offset: GMT+{((int8_t)DSTOffset15min)/4}:0{(((int8_t)DSTOffset15min)%4)*15}}}</DisplayString>
+		<DisplayString Condition="DSTOffset15min &gt;= 0 &#38;&#38; !(((int8_t)DSTOffset15min)/4 &lt; 10) &#38;&#38; !((((int8_t)DSTOffset15min)%4)*15 &lt; 10)">{{DST offset: GMT+{((int8_t)DSTOffset15min)/4}:{(((int8_t)DSTOffset15min)%4)*15}}}</DisplayString>
+
+		<DisplayString Condition="DSTOffset15min &lt; 0 &#38;&#38; ((int8_t)DSTOffset15min)/4 &gt; -10 &#38;&#38; (((int8_t)DSTOffset15min)%4)*15 &gt; -10">{{DST offset: GMT-0{-(((int8_t)DSTOffset15min)/4)}:0{-((((int8_t)DSTOffset15min)%4)*15)}}}</DisplayString>
+		<DisplayString Condition="DSTOffset15min &lt; 0 &#38;&#38; ((int8_t)DSTOffset15min)/4 &gt; -10 &#38;&#38; !((((int8_t)DSTOffset15min)%4)*15 &gt; -10)">{{DST offset: GMT-0{-(((int8_t)DSTOffset15min)/4)}:{-((((int8_t)DSTOffset15min)%4)*15)}}}</DisplayString>
+		<DisplayString Condition="DSTOffset15min &lt; 0 &#38;&#38; !(((int8_t)DSTOffset15min)/4 &gt; -10) &#38;&#38; (((int8_t)DSTOffset15min)%4)*15 &gt; -10">{{DST offset: GMT-{-(((int8_t)DSTOffset15min)/4)}:0{-((((int8_t)DSTOffset15min)%4)*15)}}}</DisplayString>
+		<DisplayString Condition="DSTOffset15min &lt; 0 &#38;&#38; !(((int8_t)DSTOffset15min)/4 &gt; -10) &#38;&#38; !((((int8_t)DSTOffset15min)%4)*15 &gt; -10)">{{DST offset: GMT-{-(((int8_t)DSTOffset15min)/4)}:{-((((int8_t)DSTOffset15min)%4)*15)}}}</DisplayString>
+		<Expand>
+			<Item Name="Hours offset">((int8_t)DSTOffset15min)/4</Item>
+			<Item Name="Minutes offset">(((int8_t)DSTOffset15min)%4)*15</Item>
+			<Item Name="DaylightTransitionStart">DaylightTransitionStart</Item>
+			<Item Name="DaylightTransitionEnd">DaylightTransitionEnd</Item>
+			<Item Name="isDST">isDST_</Item>
+		</Expand>
+	</Type>
+</AutoVisualizer>
