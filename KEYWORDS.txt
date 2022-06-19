@@ -3,6 +3,16 @@ setRaw	KEYWORD2
 getRaw	KEYWORD2
 getRawNoSync	KEYWORD2
 set	KEYWORD2
+getUnix	KEYWORD2
+fromUnix	KEYWORD2
+getOADate	KEYWORD2
+fromOADate	KEYWORD2
+get_time_t	KEYWORD2
+from_time_t	KEYWORD2
+get_timeval	KEYWORD2
+from_timeval	KEYWORD2
+get_tm	KEYWORD2
+from_tm	KEYWORD2
 
 DateTimeRawBase	KEYWORD1
 getDateTimeStruct	KEYWORD2
@@ -51,14 +61,6 @@ setDaysFromEpoch	KEYWORD2
 getDaysFromEpoch	KEYWORD2
 setMicrosecondsOfDay	KEYWORD2
 getMicrosecondsOfDay	KEYWORD2
-getUnix	KEYWORD2
-fromUnix	KEYWORD2
-getOADate	KEYWORD2
-fromOADate	KEYWORD2
-get_time_t	KEYWORD2
-from_time_t	KEYWORD2
-get_tm	KEYWORD2
-from_tm	KEYWORD2
 toArray	KEYWORD2
 toString	KEYWORD2
 toISO8601Array	KEYWORD2
@@ -77,6 +79,8 @@ DateTime	KEYWORD1
 DateTimeSysSync	KEYWORD1
 getTimeFromLastSync	KEYWORD2
 getRawSyncTime	KEYWORD2
+now	KEYWORD2
+nowUTC	KEYWORD2
 
 DateTimeTZBase	KEYWORD1
 getTimeZone	KEYWORD2
@@ -100,6 +104,8 @@ DateTimeTZSysSync	KEYWORD1
 recalcDST	KEYWORD2
 getDateTimeEnh	KEYWORD2
 isOverNextTrans	KEYWORD2
+now	KEYWORD2
+nowUTC	KEYWORD2
 
 MICROSECOND	LITERAL1
 MILLISECOND	LITERAL1
@@ -225,6 +231,8 @@ getTimeZoneMinutes	KEYWORD2
 getTimeZone	KEYWORD2
 getTimeZoneOffset	KEYWORD2
 getTimeZoneOffsetTotalMinutes	KEYWORD2
+getSystemTZ KEYWORD2
+setSystemTZ KEYWORD2
 
 DSTTransitionRuleType	KEYWORD1
 DSTTRT_Fixed	LITERAL1
@@ -269,6 +277,8 @@ setDST	KEYWORD2
 isDST	KEYWORD2
 checkDSTRegion	KEYWORD2
 getNextTransitionDate	KEYWORD2
+getSystemDST KEYWORD2
+setSystemDST KEYWORD2
 NoDST	LITERAL1
 NorthAmerica	LITERAL1
 Cuba	LITERAL1
@@ -302,6 +312,8 @@ daylightName	KEYWORD2
 keyName	KEYWORD2
 standardABR	KEYWORD2
 daylightABR	KEYWORD2
+getSystemTZInfo	KEYWORD2
+setSystemTZInfo	KEYWORD2
 Empty	LITERAL1
 
 TimeZones	KEYWORD1

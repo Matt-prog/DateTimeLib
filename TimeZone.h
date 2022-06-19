@@ -794,6 +794,30 @@ struct TimeZone {
 		return tz;
 	}
 
+	/**
+	* @brief Gets current system time zone.
+	* @note Valid time zone offset is returned on: Windows, Linux, Mac OS, ESP8266 and ESP32.
+	* On other Arduino boards UTC+00 time zone offset is returned.
+	*/
+	static TimeZone getSystemTZ();
+
+#if defined(ESP32) || defined(ESP8266)
+	/**
+	* @brief Sets current system time zone.
+	* @note This function can be used only with ESP32 or ESP8266
+	* @param tz Time zone to be set.
+	* @param dst DST adjustment to be set.
+	*/
+	static void setSystemTZ(TimeZone tz, DSTAdjustment dst);
+
+	/**
+	* @brief Sets current system time zone.
+	* @note This function can be used only with ESP32 or ESP8266
+	* @param tz Time zone to be set.
+	*/
+	static void setSystemTZ(TimeZone tz);
+#endif // defined(ESP32) || defined(ESP8266)
+
 protected:
 	int8_t timeZoneOffset15min;
 };
@@ -1273,6 +1297,22 @@ public:
 	retT getNextTransitionDate(const DateTimeBase<T>& dt, bool& nextTransIsDST) const;
 
 	/**
+	* @brief Gets current system DST adjustment.
+	* @note Valid value is returned only on: Windows, Linux, Mac OS, ESP8266 and ESP32.
+	* On other Arduino boards DSTAdjustment::NoDST is returned.
+	*/
+	static DSTAdjustment getSystemDST();
+
+#if defined(ESP32) || defined(ESP8266)
+	/**
+	* @brief Sets current system DSTAdjustment.
+	* @note This function can be used only with ESP32 or ESP8266
+	* @param dst DST adjustment to be set.
+	*/
+	static void setSystemDST( DSTAdjustment dst);
+#endif // defined(ESP32) || defined(ESP8266)
+
+	/**
 	 * @defgroup DSTAdjRules DST adjustment rules by countries and regions.
 	 * + Last revision: 22nd of May 2022
 	 * + Source: https://en.wikipedia.org/wiki/Daylight_saving_time_by_country
@@ -1491,7 +1531,6 @@ retT DSTAdjustment::getNextTransitionDate(const DateTimeBase<T>& dt, bool& nextT
 
 
 
-#define TIME_ZONE_INFO_TZ_NAME_SIZE        (45)
 #define TIME_ZONE_INFO_TZ_ABR_NAME_SIZE    (8)
 
 
@@ -1566,14 +1605,12 @@ public:
 	* @param bufferSize Size of buffer including null terminator. (It is recommended to have buffer with size at least 60 characters.)
 	* @return Returns string with POSIX time zone.
 	*/
-	//TODO !!!!
-/*#ifdef ARDUINO
-	String toPOSIX(char* buffer, int bufferSize) const;
+#ifdef ARDUINO
+	String toPOSIX() const;
 #else
-	std::string toPOSIX(char* buffer, int bufferSize) const;
-#endif // ARDUINO*/
+	std::string toPOSIX() const;
+#endif // ARDUINO
 
-	
 
 	/**
 	* @brief Time zone offset.
@@ -1588,18 +1625,30 @@ public:
 	/**
 	* @brief Name of time zone without DST. On Windows it can be translated to system language.
 	*/
-	char standardName[TIME_ZONE_INFO_TZ_NAME_SIZE];
+#ifdef ARDUINO
+	String standardName;
+#else
+	std::wstring standardName;
+#endif // ARDUINO
 	
 	/**
 	* @brief Name of time zone with DST. On Windows it can be translated to system language.
 	*/
-	char daylightName[TIME_ZONE_INFO_TZ_NAME_SIZE];
+#ifdef ARDUINO
+	String daylightName;
+#else
+	std::wstring daylightName;
+#endif // ARDUINO
 
 	/**
 	* @brief Key name of time zone. On Linux and Mac Olson name (e.g. "Europe/Paris") on Windows
 	* Windows time zone name (e.g. "Standard European Time").
 	*/
-	char keyName[TIME_ZONE_INFO_TZ_NAME_SIZE];
+#ifdef ARDUINO
+	String keyName;
+#else
+	std::string keyName;
+#endif // ARDUINO
 
 	/**
 	* @brief Abbreviation time zone name, for example: "CET".
@@ -1615,6 +1664,23 @@ public:
 	* @brief Empty time zone info.
 	*/
 	static const TimeZoneInfo Empty;
+
+	/**
+	* @brief Gets system time zone informations.
+	* @return Returns class with system time zone informations.
+	* @note This function works only with Windows, ESP32 and ESP8266
+	* @todo Implement this also for Linux and Mac OS.
+	*/
+	static TimeZoneInfo getSystemTZInfo();
+
+#if defined(ESP32) || defined(ESP8266)
+	/**
+	* @brief Sets system time zone informations. Fields keyName, standardName, daylightName are ignored.
+	* @param[in] tzinfo Time zone info to be set.
+	* @note This function works only with ESP32 and ESP8266
+	*/
+	static void setSystemTZInfo(const TimeZoneInfo& tzinfo);
+#endif // defined(ESP32) || defined(ESP8266)
 
 protected:
 
@@ -1674,6 +1740,13 @@ protected:
 	* @return Returns pointer to buffer, where null terminator was inserted.
 	*/
 	static char* offsTimeToStr(char* buffer, int bufferSize, int offset);
+
+	/**
+	* @brief Gets numeric abbreviation (for example: "<+01>" or "<-12>") from offset in minutes.
+	* @param[out] buffer Buffer, where to write numeric abbreviation. Buffer size has to be at least 8 bytes.
+	* @param bufferSize Buffer size including null terminator.
+	*/
+	static char* getNumericABRFromOffset(char* buffer, int bufferSize, int16_t offset);
 };
 
 #endif // !TIME_ZONE_H

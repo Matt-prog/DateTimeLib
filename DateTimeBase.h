@@ -311,6 +311,26 @@ public:
     }
 
     /**
+   * @brief Gets timeval strucutre time from DateTime.
+   */
+    inline timeval get_timeval() const {
+        int64_t raw = getRawTime();
+        timeval tv;
+        tv.tv_sec = raw / SECOND;
+        tv.tv_usec = raw % SECOND;
+        return tv;
+    }
+
+    /**
+    * @brief Factory method, which creates DateTime instance from timeval structure.
+    * @param[in] time Timeval strucutre time
+    */
+    static derivedSyncClass from_timeval(const timeval& time) {
+        int64_t raw = (((int64_t)time.tv_sec) * SECOND + time.tv_usec);
+        return derivedSyncClass(raw);
+    }
+
+    /**
     * @brief Gets tm time structure.
     */
     tm get_tm() const {

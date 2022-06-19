@@ -6,7 +6,7 @@
 #endif // !ARDUINO
 
 #if DT_UNDER_OS > 0
-int64_t getSysTime() {
+int64_t getSysTicks() {
 	return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
 }
 #endif // DT_UNDER_OS > 0

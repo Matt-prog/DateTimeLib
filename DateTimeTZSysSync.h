@@ -16,55 +16,6 @@
 #include "DateTimeTZ.h"
 #include "DateTimeSysSync.h"
 
-#if DT_UNDER_OS > 0
-#define DT_GET_SYS_TZ_FUNC(includeDST)		getSysTZ(includeDST)
-/**
-* @brief Gets UTC offset at specified time.
-* @param when Time, which UTC offset will be get.
-* @param[out] isDST True if DST is applyied to offset.
-* @return Returns UTC offset in minutes.
-*/
-int getUTCOffset(time_t when, bool& isDST);
-
-/**
-* @brief Gets system time zone offset (without DST)
-* and DST offset.
-* @param[out] TZ_mins Time zone offset without DST in minutes.
-* @param[out] DST_mins DST offset in minutes. If system does not use DST, it will be set to 0.
-*/
-void getSysTZandDST(int& TZ_mins, int& DST_mins);
-
-/**
-* @brief Gets system time zone.
-* @param includingDST True if time zone has to include DST offset.
-* @return Returns system time zone.
-*/
-TimeZone getSysTZ(bool includingDST = false);
-
-#else
-
-//TODO for microcontroller
-
-#endif
-
-
-#if defined(_WIN64) || defined(_WIN32)
-
-#define DT_GET_SYS_DST_FUNC()				getSysDSTAdjustmentWindows()
-/**
-* @brief Gets system DSTAdjustment on Windows.
-* @return Returns DSTAdjustment.
-*/
-DSTAdjustment getSysDSTAdjustmentWindows();
-
-#elif defined(__APPLE__)
-//TODO get system DST adjustment for MAC
-#elif defined(__linux) || defined(__unix) || defined(__posix)
-//TODO get system DST adjustment for Linux
-#else
-//Nothing here
-#endif
-
 
 /**
 * @class DateTimeTZSysSync
@@ -1399,72 +1350,67 @@ public:
 		return TimeSpan((int64_t)((currentTime - syncTime) * DT_SYNC_RESOLUTION));
 	}
 
-#ifdef DT_GET_SYS_DST_FUNC
 	/**
 	* @brief Gets system DST adjustment rules and offset.
 	* @return Returns system DST adjustment rules and offset.
 	*/
-	static inline DSTAdjustment getSystemDSTAdjustment() {
-		return DT_GET_SYS_DST_FUNC();
+	static inline DSTAdjustment getSystemDST() {
+		return DSTAdjustment::getSystemDST();
 	}
 
-	/**
-	* @brief Current system DSTAdjustment captured at the begining of program.
-	*/
-	const static DSTAdjustment systemDSTAdjustment;
-#endif // DT_GET_SYS_DST_FUNC
-
-#ifdef DT_GET_SYS_TZ_FUNC
 	/**
 	* @brief Gets system time zone.
-	* @param includingDST True if time zone has to include DST offset.
 	* @return Returns system time zone.
 	*/
-	static inline TimeZone getSystemTZ(bool includeDST = false) {
-		return DT_GET_SYS_TZ_FUNC(includeDST);
+	static inline TimeZone getSystemTZ() {
+		return TimeZone::getSystemTZ();
+	}
+
+#if (DT_SUPPORTS_NOW != 0)
+	/**
+	* @brief Gets local system time. For accurate time measuring it is recommended to get this
+	* value before measuring, see example:
+	* @code{.cpp}
+	* //WRONG:
+	* DateTime start = (DateTime)DateTimeSysSync::now();
+	* //Code to be measured is here
+	* DateTime end = (DateTime)DateTimeSysSync::now();
+	* TimeSpan duration = end - start; //Duration value will be greather than real duration, because now() is slow
+	*
+	* //OK:
+	* DateTimeSysSync clock = DateTimeSysSync::now();
+	* DateTime start = (DateTime)clock;
+	* //Code to be measured is here
+	* DateTime end = (DateTime)clock;
+	* TimeSpan duration = end - start; //Duration will be almost same as real duration
+	* @endcode
+	*/
+	inline static DateTimeTZSysSync now() {
+		return getSysTime();
 	}
 
 	/**
-	* @brief Current system TimeZone (excluding DST) captured at the begining of program.
+	* @brief Gets local system time. For accurate time measuring it is recommended to get this
+	* value before measuring, see example:
+	* @code{.cpp}
+	* //WRONG:
+	* DateTime start = (DateTime)DateTimeSysSync::nowUTC();
+	* //Code to be measured is here
+	* DateTime end = (DateTime)DateTimeSysSync::nowUTC();
+	* TimeSpan duration = end - start; //Duration value will be greather than real duration, because nowUTC() is slow
+	*
+	* //OK:
+	* DateTimeSysSync clock = DateTimeSysSync::nowUTC();
+	* DateTime start = (DateTime)clock;
+	* //Code to be measured is here
+	* DateTime end = (DateTime)clock;
+	* TimeSpan duration = end - start; //Duration will be almost same as real duration
+	* @endcode
 	*/
-	const static TimeZone systemTZ;
-#endif // DT_GET_SYS_TZ_FUNC
-
-#if defined(DT_GET_CURRENT_FUNC)
-	/**
-	* @brief Gets local time, time zone and DST adjustment.
-	*/
-	static DateTimeTZSysSync now() {
-		
-#if DT_UNDER_OS > 0
-		bool isDST;
-		DateTimeSysSync ndt = DateTimeSysSync::getCurrentTime(isDST);
-#else
-#error "TODO"
-#endif // DT_UNDER_OS > 0
-
-#ifdef DT_GET_SYS_DST_FUNC
-		DSTAdjustment adj = systemDSTAdjustment;
-#else 
-		DSTAdjustment adj = DSTAdjustment::NoDST;
-#endif // DT_GET_SYS_DST_FUNC
-
-
-#ifdef DT_GET_SYS_TZ_FUNC
-#ifdef DT_GET_SYS_DST_FUNC
-		TimeZone tz = systemTZ; //DST offset not included
-#else
-		TimeZone tz = DateTimeTZSysSync::getSystemTZ(); //Getting fresh value, because this TZ includes DST offset
-#endif // DT_GET_SYS_DST_FUNC
-#else
-		TimeZone tz; //Unknown time zone
-#endif // DT_GET_SYS_TZ_FUNC
-
-
-
-		return DateTimeTZSysSync(ndt, tz, adj, isDST);
+	inline static DateTimeTZSysSync nowUTC() {
+		return getSysTimeUTC();
 	}
-#endif // DT_GET_CURRENT_FUNC
+#endif // (DT_SUPPORTS_NOW != 0)
 
 	/**
 	* @brief Gets raw sync time.
@@ -1679,6 +1625,25 @@ protected:
 			return thisVal > othVal;
 		}
 	}
+
+
+#if (DT_SUPPORTS_NOW != 0)
+	/**
+	* @brief Gets system time in UTC.
+	* @note This function works only for: Windows, Linux, Mac OS, ESP8266 and ESP32
+	* @return Returns system time in UTC.
+	*/
+	inline static DateTimeTZSysSync getSysTimeUTC() {
+		return DateTimeTZSysSync(DateTimeSysSync::getSysTimeUTC());
+	}
+
+	/**
+	* @brief Gets local system time.
+	* @note This function works only for: Windows, Linux, Mac OS, ESP8266 and ESP32
+	* @return Returns local system time.
+	*/
+	static DateTimeTZSysSync getSysTime();
+#endif // (DT_SUPPORTS_NOW != 0)
 };
 
 #endif // !DATE_TIME_TZ_SYS_SYNC_H

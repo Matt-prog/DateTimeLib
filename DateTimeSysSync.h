@@ -107,15 +107,56 @@ public:
 		return TimeSpan((int64_t)((currentTime - syncTime) * DT_SYNC_RESOLUTION));
 	}
 
-#if defined(DT_GET_CURRENT_FUNC)
+#if (DT_SUPPORTS_NOW != 0)
 	/**
-	* @brief Gets local time.
+	* @brief Gets local system time. For accurate time measuring it is recommended to get this
+	* value before measuring, see example:
+	* @code{.cpp}
+	* //WRONG:
+	* DateTime start = (DateTime)DateTimeSysSync::now();
+	* //Code to be measured is here
+	* DateTime end = (DateTime)DateTimeSysSync::now();
+	* TimeSpan duration = end - start; //Duration value will be greather than real duration, because now() is slow
+	*
+	* //OK:
+	* DateTimeSysSync clock = DateTimeSysSync::now();
+	* DateTime start = (DateTime)clock;
+	* //Code to be measured is here
+	* DateTime end = (DateTime)clock;
+	* TimeSpan duration = end - start; //Duration will be almost same as real duration
+	* @endcode
+	* @note It is not recommended to use this function,
+	* because DST may not be adjusted when transition happends after reading this value.
+	* Rather use DateTimeTZSysSync:now(), which contains also DST adjustment rules.
 	*/
 	inline static DateTimeSysSync now() {
 		bool isDST;
-		return DT_GET_CURRENT_FUNC(isDST);
+		return getSysTime(isDST);
 	}
-#endif // !DT_GET_CURRENT_FUNC
+
+	/**
+	* @brief Gets local system time. For accurate time measuring it is recommended to get this
+	* value before measuring, see example:
+	* @code{.cpp}
+	* //WRONG:
+	* DateTime start = (DateTime)DateTimeSysSync::nowUTC();
+	* //Code to be measured is here
+	* DateTime end = (DateTime)DateTimeSysSync::nowUTC();
+	* TimeSpan duration = end - start; //Duration value will be greather than real duration, because nowUTC() is slow
+	*
+	* //OK:
+	* DateTimeSysSync clock = DateTimeSysSync::nowUTC();
+	* DateTime start = (DateTime)clock;
+	* //Code to be measured is here
+	* DateTime end = (DateTime)clock;
+	* TimeSpan duration = end - start; //Duration will be almost same as real duration
+	* @endcode
+	*/
+	inline static DateTimeSysSync nowUTC() {
+		return getSysTimeUTC();
+	}
+#endif // (DT_SUPPORTS_NOW != 0)
+
 
 	/**
 	* @brief Gets raw sync time.
@@ -175,7 +216,9 @@ public:
 
 protected:
 
+	friend class DateTimeTZSysSync;
 	template<class T> friend class ::DateTimeBase;
+	template<typename T> friend class DateTimeTZBase;
 	template<class T, typename Y> friend struct has_getRawTimeSync;
 	template<class T, typename Y> friend struct has_preSetSync;
 	template<class T, typename Y> friend struct has_getAndPreSetSync;
@@ -227,14 +270,25 @@ protected:
 		}
 	}
 
-	friend class DateTimeTZSysSync;
-	template<typename T> friend class DateTimeTZBase;
 
 	DT_SYNC_TYPE syncTime;
 
-#if DT_UNDER_OS > 0
-	static DateTimeSysSync getCurrentTime(bool& isDST);
-#endif
+#if (DT_SUPPORTS_NOW != 0)
+	/**
+	* @brief Gets system time in UTC.
+	* @note This function works only for: Windows, Linux, Mac OS, ESP8266 and ESP32
+	* @return Returns system time in UTC.
+	*/
+	static DateTimeSysSync getSysTimeUTC();
+
+	/**
+	* @brief Gets local system time.
+	* @note This function works only for: Windows, Linux, Mac OS, ESP8266 and ESP32
+	* @param[out] isDST True if current date time had applied DST offset at capture time.
+	* @return Returns local system time.
+	*/
+	static DateTimeSysSync getSysTime(bool& isDST);
+#endif //(DT_SUPPORTS_NOW != 0)
 };
 
 /*template<bool val> class tester;
