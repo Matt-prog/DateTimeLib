@@ -1519,7 +1519,38 @@ public:
 	* @param[out] pos Position, where parsing ended. If error happened during parsing, negative or zero value is returned.
 	* If parsing was successfull, positive non-zero value is returned.
 	*/
-	static TimeZoneInfo fromPOSIX(char* buffer, int bufferSize, int& pos);
+	static TimeZoneInfo fromPOSIX(const char* buffer, int bufferSize, int& pos);
+
+	/**
+	* @brief Converts POSIX time zone to TimeZoneInfo.
+	* @param buffer Buffer, where POSIX time zone is.
+	* @param bufferSize Size of buffer including null terminator.
+	*/
+	static TimeZoneInfo fromPOSIX(const char* buffer, int bufferSize);
+
+	/**
+	* @brief Converts POSIX time zone to TimeZoneInfo.
+	* @param text Text, where POSIX time zone is.
+	* @param[out] pos Position, where parsing ended. If error happened during parsing, negative or zero value is returned.
+	* If parsing was successfull, positive non-zero value is returned.
+	*/
+#ifdef ARDUINO
+	static TimeZoneInfo fromPOSIX(String text, int& pos);
+#else
+	static TimeZoneInfo fromPOSIX(std::string text, int& pos);
+#endif // ARDUINO
+
+	/**
+	* @brief Converts POSIX time zone to TimeZoneInfo.
+	* @param text Text, where POSIX time zone is.
+	*/
+#ifdef ARDUINO
+	static TimeZoneInfo fromPOSIX(String text);
+#else
+	static TimeZoneInfo fromPOSIX(std::string text);
+#endif // ARDUINO
+
+	
 
 	/**
 	* @brief Converts TimeZoneInfo to POSIX time zone.
@@ -1527,7 +1558,22 @@ public:
 	* @param bufferSize Size of buffer including null terminator. (It is recommended to have buffer with size at least 60 characters.)
 	* @return Returns pointer to buffer, where null terminator was inserted.
 	*/
-	char* toPOSIX(char* buffer, int bufferSize);
+	char* toPOSIX(char* buffer, int bufferSize) const;
+
+	/**
+	* @brief Converts TimeZoneInfo to POSIX time zone string.
+	* @param buffer Buffer, where POSIX time zone will be written.
+	* @param bufferSize Size of buffer including null terminator. (It is recommended to have buffer with size at least 60 characters.)
+	* @return Returns string with POSIX time zone.
+	*/
+	//TODO !!!!
+/*#ifdef ARDUINO
+	String toPOSIX(char* buffer, int bufferSize) const;
+#else
+	std::string toPOSIX(char* buffer, int bufferSize) const;
+#endif // ARDUINO*/
+
+	
 
 	/**
 	* @brief Time zone offset.
@@ -1580,7 +1626,7 @@ protected:
 	* @param bufferTo Buffer, to copy abbreviation name to.
 	* @return Returns pointer to character after last copyied character from bufferFrom.
 	*/
-	static char* copyABR(char* bufferFrom, size_t bufferFromSize, char* bufferTo);
+	static const char* copyABR(const char* bufferFrom, size_t bufferFromSize, char* bufferTo);
 
 	/**
 	* @brief Converts two string with two integer digits with optional + or - sign.
@@ -1590,7 +1636,7 @@ protected:
 	* @return Returns pointer to character after last parsed character from bufferFrom. If parsing
 	* failed, bufferFrom is returned.
 	*/
-	static char* atoiTZ(char* bufferFrom, int bufferFromSize, int& value, uint8_t digitsLimit);
+	static const char* atoiTZ(const char* bufferFrom, int bufferFromSize, int& value, uint8_t digitsLimit);
 
 	/**
 	* @brief Parses offset time specified in POSIX time zone.
@@ -1599,7 +1645,7 @@ protected:
 	* @param parsed_min[out] Parsed offset time in minutes.
 	* @return Returns true if parsing was successfull.
 	*/
-	static bool parseOffsTime(char*& buffer, int& bufferSize, int16_t& parsed_min);
+	static bool parseOffsTime(const char*& buffer, int& bufferSize, int16_t& parsed_min);
 
 	/**
 	* @brief Parses DST transition from POSIX time zone
@@ -1607,7 +1653,7 @@ protected:
 	* @param bufferFromSize Size of bufferFrom including null terminator. Parsed char count is subtracted from this value after parsing.
 	* @return Returns DSTTransitionRule::NoDST at error;
 	*/
-	static DSTTransitionRule parseDSTTrans(char*& buffer, int& bufferSize);
+	static DSTTransitionRule parseDSTTrans(const char*& buffer, int& bufferSize);
 
 	/**
 	* @brief Converts number with three digits to string.

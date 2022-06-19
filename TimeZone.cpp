@@ -280,7 +280,7 @@ const DSTAdjustment DSTAdjustment::NewZeland = DSTAdjustment(DSTTransitionRule(2
 
 const TimeZoneInfo TimeZoneInfo::Empty = TimeZoneInfo();
 
-TimeZoneInfo TimeZoneInfo::fromPOSIX(char* buffer, int bufferSize, int& pos) {
+TimeZoneInfo TimeZoneInfo::fromPOSIX(const char* buffer, int bufferSize, int& pos) {
 	pos = 0;
 	if (bufferSize <= 0) return TimeZoneInfo::Empty;
 	int oldBufSize = bufferSize;
@@ -288,7 +288,7 @@ TimeZoneInfo TimeZoneInfo::fromPOSIX(char* buffer, int bufferSize, int& pos) {
 	TimeZoneInfo ret;
 	
 	//Copying abbreviation name
-	char* newBuffer = copyABR(buffer, bufferSize, ret.standardABR);
+	const char* newBuffer = copyABR(buffer, bufferSize, ret.standardABR);
 	int diff = (int)(newBuffer - buffer);
 	bufferSize -= diff;
 	buffer = newBuffer;
@@ -383,7 +383,34 @@ TimeZoneInfo TimeZoneInfo::fromPOSIX(char* buffer, int bufferSize, int& pos) {
 	return ret;
 }
 
-char* TimeZoneInfo::toPOSIX(char* buffer, int bufferSize) {
+TimeZoneInfo TimeZoneInfo::fromPOSIX(const char* buffer, int bufferSize) {
+	int pos;
+	return fromPOSIX(buffer, bufferSize, pos);
+}
+
+#ifdef ARDUINO
+TimeZoneInfo TimeZoneInfo::fromPOSIX(String text, int& pos) {
+	return TimeZoneInfo::fromPOSIX(text.c_str(), text.length() + 1, pos);
+}
+#else
+TimeZoneInfo TimeZoneInfo::fromPOSIX(std::string text, int& pos) {
+	return TimeZoneInfo::fromPOSIX(text.c_str(), text.length()+1, pos);
+}
+#endif // ARDUINO
+
+#ifdef ARDUINO
+TimeZoneInfo TimeZoneInfo::fromPOSIX(String text) {
+	int pos;
+	return TimeZoneInfo::fromPOSIX(text.c_str(), text.length() + 1, pos);
+}
+#else
+TimeZoneInfo TimeZoneInfo::fromPOSIX(std::string text) {
+	int pos;
+	return TimeZoneInfo::fromPOSIX(text.c_str(), text.length() + 1, pos);
+}
+#endif // ARDUINO
+
+char* TimeZoneInfo::toPOSIX(char* buffer, int bufferSize) const {
 	if (bufferSize <= 0) return buffer;
 	bufferSize--;
 
@@ -573,7 +600,9 @@ char* TimeZoneInfo::toPOSIX(char* buffer, int bufferSize) {
 	return buffer;
 }
 
-char* TimeZoneInfo::copyABR(char* bufferFrom, size_t bufferFromSize, char* bufferTo) {
+
+
+const char* TimeZoneInfo::copyABR(const char* bufferFrom, size_t bufferFromSize, char* bufferTo) {
 	
 	//Resolving maximum size
 	if (bufferFromSize > TIME_ZONE_INFO_TZ_ABR_NAME_SIZE) {
@@ -604,7 +633,7 @@ char* TimeZoneInfo::copyABR(char* bufferFrom, size_t bufferFromSize, char* buffe
 	return bufferFrom;
 }
 
-char* TimeZoneInfo::atoiTZ(char* bufferFrom, int bufferFromSize, int& value, uint8_t digitsLimit) {
+const char* TimeZoneInfo::atoiTZ(const char* bufferFrom, int bufferFromSize, int& value, uint8_t digitsLimit) {
 	if (bufferFromSize < 1) {
 		value = INT_MIN;
 		return bufferFrom;
@@ -642,10 +671,10 @@ char* TimeZoneInfo::atoiTZ(char* bufferFrom, int bufferFromSize, int& value, uin
 	return bufferFrom;
 }
 
-bool TimeZoneInfo::parseOffsTime(char*& buffer, int& bufferSize, int16_t& parsed_min) {
+bool TimeZoneInfo::parseOffsTime(const char*& buffer, int& bufferSize, int16_t& parsed_min) {
 	//Parsing TZ offset (hours)
 	int val;
-	char* newBuffer = atoiTZ(buffer, bufferSize, val, 3);
+	const char* newBuffer = atoiTZ(buffer, bufferSize, val, 3);
 	int diff = (int)(newBuffer - buffer);
 	bufferSize -= diff;
 	parsed_min = val * 60; //Hours
@@ -711,7 +740,7 @@ bool TimeZoneInfo::parseOffsTime(char*& buffer, int& bufferSize, int16_t& parsed
 	return true;
 }
 
-DSTTransitionRule TimeZoneInfo::parseDSTTrans(char*& buffer, int& bufferSize) {
+DSTTransitionRule TimeZoneInfo::parseDSTTrans(const char*& buffer, int& bufferSize) {
 	if (bufferSize < 2) {
 		return DSTTransitionRule::NoDST;
 	}
@@ -728,7 +757,7 @@ DSTTransitionRule TimeZoneInfo::parseDSTTrans(char*& buffer, int& bufferSize) {
 		--bufferSize;
 
 		int val;
-		char* newBuffer = atoiTZ(buffer, bufferSize, val, 3);
+		const char* newBuffer = atoiTZ(buffer, bufferSize, val, 3);
 		int diff = (int)(newBuffer - buffer);
 		bufferSize -= diff;
 		bool negative = buffer[0] == '-';
@@ -758,7 +787,7 @@ DSTTransitionRule TimeZoneInfo::parseDSTTrans(char*& buffer, int& bufferSize) {
 		--bufferSize;
 
 		int val;
-		char* newBuffer = atoiTZ(buffer, bufferSize, val, 2);
+		const char* newBuffer = atoiTZ(buffer, bufferSize, val, 2);
 		int diff = (int)(newBuffer - buffer);
 		bufferSize -= diff;
 		bool negative = buffer[0] == '-';
@@ -809,7 +838,7 @@ DSTTransitionRule TimeZoneInfo::parseDSTTrans(char*& buffer, int& bufferSize) {
 	else {
 		//Just number - A plain integer denotes a day of the year, counting from zero to 364, or to 365 in leap years.
 		int val;
-		char* newBuffer = atoiTZ(buffer, bufferSize, val, 3);
+		const char* newBuffer = atoiTZ(buffer, bufferSize, val, 3);
 		int diff = (int)(newBuffer - buffer);
 		bufferSize -= diff;
 		buffer = newBuffer;
