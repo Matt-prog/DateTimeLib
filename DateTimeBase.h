@@ -335,11 +335,11 @@ public:
     */
     tm get_tm() const {
         DateTime_DST_tuple tup;
-        if constexpr (has_getDateTimeEnh<derivedSyncClass>::value) {
+        CONSTEXPR_IF(has_getDateTimeEnh<derivedSyncClass>::value) {
             tup = static_cast<const derivedSyncClass*>(this)->getDateTimeEnh(); //getting DateTime with isDST flag at same time
         }
         else {
-            if constexpr (has_isDST<derivedSyncClass>::value) {
+            CONSTEXPR_IF(has_isDST<derivedSyncClass>::value) {
                 tup.isDST = static_cast<const derivedSyncClass*>(this)->isDST();
             }
             else {
@@ -388,7 +388,7 @@ protected:
     * @note It is recommended to call this member function instead of getRawTimeNoSync().
     */
     inline int64_t getRawTime() const {
-        if constexpr (has_getRawTimeSync<derivedSyncClass>::value) {
+        CONSTEXPR_IF(has_getRawTimeSync<derivedSyncClass>::value) {
             return static_cast<const derivedSyncClass*>(this)->getRawTimeSync();
         }
         else {
@@ -413,7 +413,7 @@ protected:
     * @param value Raw value to set.
     */
     inline void setRawTime(int64_t value) {
-        if constexpr (has_setRawTimeTD<derivedSyncClass>::value) {
+        CONSTEXPR_IF (has_setRawTimeTD<derivedSyncClass>::value) {
             static_cast<derivedSyncClass*>(this)->setRawTimeTD(value);
         }
         else {
@@ -440,7 +440,7 @@ protected:
     * @note It is recommended to call this member function instead of addRawTimeNoTD().
     */
     inline void addRawTime(int64_t value) {
-        if constexpr (has_addRawTimeTD<derivedSyncClass>::value) {
+        CONSTEXPR_IF (has_addRawTimeTD<derivedSyncClass>::value) {
             static_cast<derivedSyncClass*>(this)->addRawTimeTD(value);
         }
         else {
@@ -464,7 +464,7 @@ protected:
     * @note It is recommended to call it before raw value calculation or at the begin of member function.
     */
     inline void syncBeforeSet() {
-        if constexpr (has_preSetSync<derivedSyncClass>::value) {
+        CONSTEXPR_IF (has_preSetSync<derivedSyncClass>::value) {
             static_cast<derivedSyncClass*>(this)->preSetSync();
         }
     }
@@ -473,7 +473,7 @@ protected:
     * @return Returns raw value after synchronization.
     */
     inline int64_t getAndSyncBeforeSet() {
-        if constexpr (has_getAndPreSetSync<derivedSyncClass>::value) {
+        CONSTEXPR_IF (has_getAndPreSetSync<derivedSyncClass>::value) {
             return static_cast<derivedSyncClass*>(this)->getAndPreSetSync();
         }
         else {
@@ -1365,10 +1365,10 @@ public:
     char* toArray(char* buffer, size_t bufferSize, const char* format = "yyyy-MM-ddTHH:mm:ss.ffffffZZZ", const char* const* monthNames = NULL, const char* const* weekDayNames = NULL) const {
         int16_t tz = 0;
         int16_t dst = 0;
-        if constexpr (has_getTimeZoneOffsetMinutes<derivedSyncClass>::value) {
+        CONSTEXPR_IF (has_getTimeZoneOffsetMinutes<derivedSyncClass>::value) {
             tz = static_cast<const derivedSyncClass*>(this)->getTimeZoneOffsetMinutes();
         }
-        if constexpr (has_getCurrentDSTOffsetMinutes<derivedSyncClass>::value) {
+        CONSTEXPR_IF (has_getCurrentDSTOffsetMinutes<derivedSyncClass>::value) {
             dst = static_cast<const derivedSyncClass*>(this)->getCurrentDSTOffsetMinutes();
         }
         return dtlib::dateTimeToArray(buffer, bufferSize, format, DateTimeBase<derivedSyncClass>::getRawTime(), tz, dst, monthNames, weekDayNames);
@@ -1454,10 +1454,10 @@ public:
 #endif // ARDUINO
         int16_t tz = 0;
         int16_t dst = 0;
-        if constexpr (has_getTimeZoneOffsetMinutes<derivedSyncClass>::value) {
+        CONSTEXPR_IF (has_getTimeZoneOffsetMinutes<derivedSyncClass>::value) {
             tz = static_cast<const derivedSyncClass*>(this)->getTimeZoneOffsetMinutes();
         }
-        if constexpr (has_getCurrentDSTOffsetMinutes<derivedSyncClass>::value) {
+        CONSTEXPR_IF (has_getCurrentDSTOffsetMinutes<derivedSyncClass>::value) {
             dst = static_cast<const derivedSyncClass*>(this)->getCurrentDSTOffsetMinutes();
         }
         return dtlib::dateTimeToString(format, DateTimeBase<derivedSyncClass>::getRawTime(), tz, dst, monthNames, weekDayNames);
@@ -1633,7 +1633,7 @@ public:
 
         DateTimeBase<derivedSyncClass>::setRawTime(dtlib::dateTimeToRaw(parsedVal));
 
-        if constexpr (has_setTimeZone<derivedSyncClass>::value) {
+        CONSTEXPR_IF (has_setTimeZone<derivedSyncClass>::value) {
             int16_t offset = tz_DST_Offset;
             if (offset == 0) {
                 offset = tzOffset + DSTOffset;
@@ -1745,7 +1745,7 @@ public:
 
         DateTimeBase<derivedSyncClass>::setRawTime(dateTimeToRaw(parsedVal));
 
-        if constexpr (has_setTimeZone<derivedSyncClass>::value) {
+        CONSTEXPR_IF (has_setTimeZone<derivedSyncClass>::value) {
             static_cast<derivedSyncClass*>(this)->setTimeZone(TimeZone::fromTotalMinutesOffset(tzOffset), false);
         }
 

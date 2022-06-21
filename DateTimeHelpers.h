@@ -31,6 +31,12 @@
 #include <time.h>
 #include <stdlib.h>
 
+#if __cplusplus >= 201703L
+#define CONSTEXPR_IF if constexpr
+#else
+#define CONSTEXPR_IF if constexpr //TODO shows warning
+#endif
+
 #if DT_UNDER_OS > 0
 #include <chrono>
 #include <string>

@@ -991,12 +991,12 @@ public:
 	*/
 	template<class T, typename dtlib::enable_if<has_getRaw<T>::value && has_getDST<T>::value, int>::type = 0>
 	void set(const DateTimeBase<T>& dt) {
-		if constexpr (has_getTimeZone<T>::value) {
+		CONSTEXPR_IF (has_getTimeZone<T>::value) {
 			tzInfo = static_cast<const T*>(&dt)->getTimeZone();
 		}
 		adj = static_cast<const T*>(&dt)->getDST();
 
-		if constexpr (has_getDateTimeEnh<T>::value) {
+		CONSTEXPR_IF (has_getDateTimeEnh<T>::value) {
 			DateTime_DST_tuple tup = static_cast<const T*>(&dt)->getDateTimeEnh(); //getting DateTime with isDST flag at same time
 			adj.setDST(tup.isDST);
 			DateTimeBase<derivedClass>::setRawTime(tup.value);
@@ -1013,12 +1013,12 @@ public:
 	*/
 	template<class T, typename dtlib::enable_if<has_getRaw<T>::value && !has_getDST<T>::value, int>::type = 0>
 	void set(const DateTimeBase<T>& dt, bool DST_app = false) {
-		if constexpr (has_getTimeZone<T>::value) {
+		CONSTEXPR_IF (has_getTimeZone<T>::value) {
 			tzInfo = static_cast<const T*>(&dt)->getTimeZone();
 		}
 		adj.setDST(DST_app);
 
-		if constexpr (has_getDateTimeEnh<T>::value) {
+		CONSTEXPR_IF (has_getDateTimeEnh<T>::value) {
 			DateTime_DST_tuple tup = static_cast<const T*>(&dt)->getDateTimeEnh(); //getting DateTime with isDST flag at same time
 			DateTimeBase<derivedClass>::setRawTime(tup.value);
 		}
@@ -1037,7 +1037,7 @@ public:
 		tzInfo = tz;
 		adj = static_cast<const T*>(&dt)->getDST();
 
-		if constexpr (has_getDateTimeEnh<T>::value) {
+		CONSTEXPR_IF (has_getDateTimeEnh<T>::value) {
 			DateTime_DST_tuple tup = static_cast<const T*>(&dt)->getDateTimeEnh(); //getting DateTime with isDST flag at same time
 			adj.setDST(tup.isDST);
 			DateTimeBase<derivedClass>::setRawTime(tup.value);
@@ -1058,7 +1058,7 @@ public:
 		tzInfo = tz;
 		adj.setDST(DST_app);
 
-		if constexpr (has_getDateTimeEnh<T>::value) {
+		CONSTEXPR_IF (has_getDateTimeEnh<T>::value) {
 			DateTime_DST_tuple tup = static_cast<const T*>(&dt)->getDateTimeEnh(); //getting DateTime with isDST flag at same time
 			DateTimeBase<derivedClass>::setRawTime(tup.value);
 		}
@@ -1100,7 +1100,7 @@ public:
 		tzInfo = tz;
 		adj = dst;
 
-		if constexpr (has_getDateTimeEnh<T>::value) {
+		CONSTEXPR_IF (has_getDateTimeEnh<T>::value) {
 			DateTime_DST_tuple tup = static_cast<const T*>(&dt)->getDateTimeEnh(); //getting DateTime with isDST flag at same time
 			adj.setDST(tup.isDST);
 			DateTimeBase<derivedClass>::setRawTime(tup.value);
@@ -1123,7 +1123,7 @@ public:
 		adj = dst;
 		adj.setDST(DST_app);
 
-		if constexpr (has_getDateTimeEnh<T>::value) {
+		CONSTEXPR_IF (has_getDateTimeEnh<T>::value) {
 			DateTime_DST_tuple tup = static_cast<const T*>(&dt)->getDateTimeEnh(); //getting DateTime with isDST flag at same time
 			DateTimeBase<derivedClass>::setRawTime(tup.value);
 		}
@@ -1280,7 +1280,7 @@ public:
 	* @brief Checks if DST is applyied.
 	*/
 	inline bool isDST() const {
-		if constexpr (has_isSyncDST<derivedClass>::value) {
+		CONSTEXPR_IF (has_isSyncDST<derivedClass>::value) {
 			return static_cast<const derivedClass*>(this)->isSyncDST();
 		}
 		else {
@@ -1417,7 +1417,7 @@ protected:
 			adj.setDST(newDST);
 		}
 		DateTimeTZBase<derivedClass>::setRawTimeNoTD(val); //This does not call setRawTimeTD(), because it would cause endless recursion
-		if constexpr (has_calcNextTransOnSet<derivedClass>::value) {
+		CONSTEXPR_IF (has_calcNextTransOnSet<derivedClass>::value) {
 			static_cast<derivedClass*>(this)->calcNextTransOnSet(val, newDST);
 		}
 	}
@@ -1443,7 +1443,7 @@ protected:
 			adj.setDST(newDST);
 		}
 		DateTimeTZBase<derivedClass>::addRawTimeNoTD(val); //This does not call addRawTimeTD(), because it would cause endless recursion
-		if constexpr (has_calcNextTransOnSet<derivedClass>::value) {
+		CONSTEXPR_IF (has_calcNextTransOnSet<derivedClass>::value) {
 			static_cast<derivedClass*>(this)->calcNextTransOnSet(dtToCheck, false);
 		}
 	}

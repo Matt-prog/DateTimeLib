@@ -173,7 +173,7 @@ public:
 		//Appling unapplied offset to raw values.
 		int64_t thisVal = DateTimeBase<DateTimeSysSync>::getRawTimeNoSync();
 		int64_t othVal;
-		if constexpr (has_unappliedOffset<T>::value) {
+		CONSTEXPR_IF (has_unappliedOffset<T>::value) {
 			DT_SYNC_TYPE currSyncTime = DT_SYNC_FUNC();
 			othVal = dt2.getRawNoSync() + static_cast<const T*>(&dt2)->unappliedOffset(currSyncTime);
 		}
@@ -254,7 +254,7 @@ protected:
 		//Appling unapplied offset to raw values.
 		int64_t thisVal = DateTimeBase<DateTimeSysSync>::getRawTimeNoSync();
 		int64_t othVal;
-		if constexpr (has_unappliedOffset<T>::value) {
+		CONSTEXPR_IF (has_unappliedOffset<T>::value) {
 			DT_SYNC_TYPE currSyncTime = DT_SYNC_FUNC();
 			othVal = dt2.getRawNoSync() + static_cast<const T*>(&dt2)->unappliedOffset(currSyncTime);
 		}

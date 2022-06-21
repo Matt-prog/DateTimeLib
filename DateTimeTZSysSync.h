@@ -1070,17 +1070,17 @@ public:
 		&& has_getDST<T>::value,
 		int>::type = 0>
 	void set(const DateTimeBase<T>& dt) {
-		if constexpr (has_getTimeZone<T>::value) {
+		CONSTEXPR_IF (has_getTimeZone<T>::value) {
 			DateTimeTZBase<DateTimeTZSysSync>::tzInfo = static_cast<const T*>(&dt)->getTimeZone();
 		}
 		DateTimeTZBase<DateTimeTZSysSync>::adj = static_cast<const T*>(&dt)->getDST();
 
-		if constexpr (has_getRawSyncTime<T>::value) {
+		CONSTEXPR_IF (has_getRawSyncTime<T>::value) {
 			//System synchronized DateTime
 			setSyncedTime(dt.getRawNoSync(), static_cast<const T*>(&dt)->getRawSyncTime(), DateTimeTZBase<DateTimeTZSysSync>::adj.isDST());
 		}
 		else {
-			if constexpr (has_getDateTimeEnh<T>::value) {
+			CONSTEXPR_IF (has_getDateTimeEnh<T>::value) {
 				DateTime_DST_tuple tup = static_cast<const T*>(&dt)->getDateTimeEnh(); //getting DateTime with isDST flag at same time
 				adj.setDST(tup.isDST);
 				DateTimeBase<DateTimeTZSysSync>::setRawTime(tup.value);
@@ -1103,12 +1103,12 @@ public:
 		&& !has_getDST<T>::value,
 		int>::type = 1>
 	void set(const DateTimeBase<T>& dt, bool DST_app = false) {
-		if constexpr (has_getTimeZone<T>::value) {
+		CONSTEXPR_IF (has_getTimeZone<T>::value) {
 			DateTimeTZBase<DateTimeTZSysSync>::tzInfo = static_cast<const T*>(&dt)->getTimeZone();
 		}
 		adj.setDST(DST_app);
 
-		if constexpr (has_getRawSyncTime<T>::value) {
+		CONSTEXPR_IF (has_getRawSyncTime<T>::value) {
 			//System synchronized DateTime
 			setSyncedTime(dt.getRawNoSync(), static_cast<const T*>(&dt)->getRawSyncTime(), DST_app);
 		}
@@ -1132,12 +1132,12 @@ public:
 		DateTimeTZBase<DateTimeTZSysSync>::tzInfo = tz;
 		DateTimeTZBase<DateTimeTZSysSync>::adj = static_cast<const T*>(&dt)->getDST();
 
-		if constexpr (has_getRawSyncTime<T>::value) {
+		CONSTEXPR_IF (has_getRawSyncTime<T>::value) {
 			//System synchronized DateTime
 			setSyncedTime(dt.getRawNoSync(), static_cast<const T*>(&dt)->getRawSyncTime(), DateTimeTZBase<DateTimeTZSysSync>::adj.isDST());
 		}
 		else {
-			if constexpr (has_getDateTimeEnh<T>::value) {
+			CONSTEXPR_IF (has_getDateTimeEnh<T>::value) {
 				DateTime_DST_tuple tup = static_cast<const T*>(&dt)->getDateTimeEnh(); //getting DateTime with isDST flag at same time
 				adj.setDST(tup.isDST);
 				DateTimeBase<DateTimeTZSysSync>::setRawTime(tup.value);
@@ -1164,7 +1164,7 @@ public:
 		DateTimeTZBase<DateTimeTZSysSync>::tzInfo = tz;
 		adj.setDST(DST_app);
 
-		if constexpr (has_getRawSyncTime<T>::value) {
+		CONSTEXPR_IF (has_getRawSyncTime<T>::value) {
 			//System synchronized DateTime
 			setSyncedTime(dt.getRawNoSync(), static_cast<const T*>(&dt)->getRawSyncTime(), DST_app);
 		}
@@ -1220,12 +1220,12 @@ public:
 		DateTimeTZBase<DateTimeTZSysSync>::tzInfo = tz;
 		DateTimeTZBase<DateTimeTZSysSync>::adj = dst;
 
-		if constexpr (has_getRawSyncTime<T>::value) {
+		CONSTEXPR_IF (has_getRawSyncTime<T>::value) {
 			//System synchronized DateTime
 			setSyncedTime(dt.getRawNoSync(), static_cast<const T*>(&dt)->getRawSyncTime(), DST_app);
 		}
 		else {
-			if constexpr (has_getDateTimeEnh<T>::value) {
+			CONSTEXPR_IF (has_getDateTimeEnh<T>::value) {
 				DateTime_DST_tuple tup = static_cast<const T*>(&dt)->getDateTimeEnh(); //getting DateTime with isDST flag at same time
 				adj.setDST(DST_app);
 				DateTimeBase<DateTimeTZSysSync>::setRawTime(tup.value);
@@ -1268,12 +1268,12 @@ public:
 		DateTimeTZBase<DateTimeTZSysSync>::tzInfo = tz;
 		DateTimeTZBase<DateTimeTZSysSync>::adj = dst;
 
-		if constexpr (has_getRawSyncTime<T>::value) {
+		CONSTEXPR_IF (has_getRawSyncTime<T>::value) {
 			//System synchronized DateTime
 			setSyncedTime(dt.getRawNoSync(), static_cast<const T*>(&dt)->getRawSyncTime(), DateTimeTZBase<DateTimeTZSysSync>::adj.isDST());
 		}
 		else {
-			if constexpr (has_getDateTimeEnh<T>::value) {
+			CONSTEXPR_IF (has_getDateTimeEnh<T>::value) {
 				DateTime_DST_tuple tup = static_cast<const T*>(&dt)->getDateTimeEnh(); //getting DateTime with isDST flag at same time
 				adj.setDST(tup.isDST);
 				DateTimeBase<DateTimeTZSysSync>::setRawTime(tup.value);
@@ -1312,7 +1312,7 @@ public:
 	template<class T>
 	void setUTC(const DateTimeBase<T>& dt) {
 		
-		if constexpr (has_getRawSyncTime<T>::value) {
+		CONSTEXPR_IF (has_getRawSyncTime<T>::value) {
 			//System synchronized DateTime
 			int64_t dateTime = dt.getRawNoSync();
 			int64_t tzOffset = (int64_t)getTimeZoneOffset();
@@ -1457,7 +1457,7 @@ public:
 		DT_SYNC_TYPE currSyncTime = DT_SYNC_FUNC();
 		int64_t thisVal = DateTimeBase<DateTimeTZSysSync>::getRawTimeNoSync() + unappliedOffset(currSyncTime);
 		int64_t othVal;
-		if constexpr (has_unappliedOffset<T>::value) othVal = raw.getRawNoSync() + raw.unappliedOffset(currSyncTime);
+		CONSTEXPR_IF (has_unappliedOffset<T>::value) othVal = raw.getRawNoSync() + raw.unappliedOffset(currSyncTime);
 		else othVal = raw.getRawNoSync();
 
 		return TimeSpan(thisVal - othVal - syncOffset);
@@ -1474,7 +1474,7 @@ public:
 		DT_SYNC_TYPE currSyncTime = DT_SYNC_FUNC();
 		int64_t thisVal = DateTimeBase<DateTimeTZSysSync>::getRawTimeNoSync() + unappliedOffset(currSyncTime);
 		int64_t othVal;
-		if constexpr (has_unappliedOffset<T>::value) othVal = raw.getRawNoSync() + static_cast<const T*>(&raw)->unappliedOffset(currSyncTime);
+		CONSTEXPR_IF (has_unappliedOffset<T>::value) othVal = raw.getRawNoSync() + static_cast<const T*>(&raw)->unappliedOffset(currSyncTime);
 		else othVal = raw.getRawNoSync();
 
 		return TimeSpan(thisVal - othVal - offset);
@@ -1584,7 +1584,7 @@ protected:
 		DT_SYNC_TYPE currSyncTime = DT_SYNC_FUNC();
 		int64_t thisVal = DateTimeBase<DateTimeTZSysSync>::getRawTimeNoSync() + unappliedOffset(currSyncTime);
 		int64_t othVal;
-		if constexpr (has_unappliedOffset<T>::value) othVal = dt2.getRawNoSync() + static_cast<const T*>(&dt2)->unappliedOffset(currSyncTime);
+		CONSTEXPR_IF (has_unappliedOffset<T>::value) othVal = dt2.getRawNoSync() + static_cast<const T*>(&dt2)->unappliedOffset(currSyncTime);
 		else othVal = dt2.getRawNoSync();
 
 		thisVal -= syncOffset;
@@ -1613,7 +1613,7 @@ protected:
 		DT_SYNC_TYPE currSyncTime = DT_SYNC_FUNC();
 		int64_t thisVal = DateTimeBase<DateTimeTZSysSync>::getRawTimeNoSync() + unappliedOffset(currSyncTime);
 		int64_t othVal;
-		if constexpr (has_unappliedOffset<T>::value) othVal = dt2.getRawNoSync() + static_cast<const T*>(&dt2)->unappliedOffset(currSyncTime);
+		CONSTEXPR_IF (has_unappliedOffset<T>::value) othVal = dt2.getRawNoSync() + static_cast<const T*>(&dt2)->unappliedOffset(currSyncTime);
 		else othVal = dt2.getRawNoSync();
 
 		thisVal -= offset;

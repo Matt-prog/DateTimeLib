@@ -137,34 +137,8 @@ static TimeZone getSysTZ(bool includingDST) {
 
 
 TimeZone TimeZone::getSystemTZ() {
-#if DT_UNDER_OS == DT_WIN       //Windows specific code
-    DYNAMIC_TIME_ZONE_INFORMATION timeZoneInformation;
-    GetDynamicTimeZoneInformation(&timeZoneInformation);
-    return TimeZone::fromTotalMinutesOffset(-timeZoneInformation.Bias);
-
-#elif DT_UNDER_OS == DT_LINUX   //Linux specific code
-    //TODO implement propertly
-    bool isDST;
-    getUTCOffset(time(NULL), isDST);
-    return getSysTZ(isDST);
-#elif DT_UNDER_OS == DT_MAC     //Mac OS specific code
-    //TODO implement propertly
-    bool isDST;
-    getUTCOffset(time(NULL), isDST);
-    return getSysTZ(isDST);
-#elif defined(ESP32) || defined(ESP8266)    //ESP8266 and ESP32 specific code
-    const char* tz_env = getenv("TZ");
-    if (tz_env != NULL) {
-        int pos;
-        TimeZoneInfo result = TimeZoneInfo::fromPOSIX(tz_env, strlen(tz_env), pos);
-        return result.timeZone;
-    }
-    else {
-        return TimeZone();
-    }
-#else   //Arduino specific code
-    return TimeZone();
-#endif
+    TimeZoneInfo tzinfo = TimeZoneInfo::getSystemTZInfo();
+    return tzinfo.timeZone;
 }
 
 #if defined(ESP32) || defined(ESP8266)
@@ -183,77 +157,14 @@ void TimeZone::setSystemTZ(TimeZone tz) {
 #endif // defined(ESP32) || defined(ESP8266)
 
 DSTAdjustment DSTAdjustment::getSystemDST() {
-#if DT_UNDER_OS == DT_WIN       //Windows specific code
-    //For more info see TimeZoneInfo::getSystemTZInfo()
-    DYNAMIC_TIME_ZONE_INFORMATION timeZoneInformation;
-    GetDynamicTimeZoneInformation(&timeZoneInformation);
-    bool supportsDst = (timeZoneInformation.StandardDate.wMonth != 0);
-    if (supportsDst) {
-        DSTTransitionRule startRule;
-        if (timeZoneInformation.DaylightDate.wYear == 0) {
-            //Floating rule
-            startRule = DSTTransitionRule((int8_t)timeZoneInformation.DaylightDate.wHour,
-                (int8_t)timeZoneInformation.DaylightDate.wMonth,
-                ((DayOfWeek)(timeZoneInformation.DaylightDate.wDayOfWeek + 1)),
-                (WeekOfMonth)(timeZoneInformation.DaylightDate.wDay - 1),
-                0);
-        }
-        else {
-            //Fixed rule
-            startRule = DSTTransitionRule((int8_t)timeZoneInformation.DaylightDate.wHour,
-                (int8_t)timeZoneInformation.DaylightDate.wMonth,
-                (int8_t)timeZoneInformation.DaylightDate.wDay,
-                0);
-        }
-
-        DSTTransitionRule endRule;
-        if (timeZoneInformation.StandardDate.wYear == 0) {
-            //Floating rule
-            endRule = DSTTransitionRule((int8_t)timeZoneInformation.StandardDate.wHour,
-                (int8_t)timeZoneInformation.StandardDate.wMonth,
-                ((DayOfWeek)(timeZoneInformation.StandardDate.wDayOfWeek + 1)),
-                (WeekOfMonth)(timeZoneInformation.StandardDate.wDay - 1),
-                0);
-        }
-        else {
-            //Fixed rule
-            endRule = DSTTransitionRule((int8_t)timeZoneInformation.StandardDate.wHour,
-                (int8_t)timeZoneInformation.StandardDate.wMonth,
-                (int8_t)timeZoneInformation.StandardDate.wDay,
-                0);
-        }
-
-        int DST_offset = -timeZoneInformation.DaylightBias;
-        int DST_offset_h = DST_offset / 60;
-        int DST_offset_m = DST_offset % 60;
-
-        return DSTAdjustment(startRule, endRule, DST_offset_h, DST_offset_m, false);
-    }
-    return DSTAdjustment();
-
-#elif DT_UNDER_OS == DT_LINUX   //Linux specific code
-    return DSTAdjustment(); //TODO implement
-#elif DT_UNDER_OS == DT_MAC     //Mac OS specific code
-    return DSTAdjustment(); //TODO implement
-#elif defined(ESP32) || defined(ESP8266)    //ESP8266 and ESP32 specific code
-    const char* tz_env = getenv("TZ");
-    if (tz_env != NULL) {
-        int pos;
-        TimeZoneInfo result = TimeZoneInfo::fromPOSIX(tz_env, strlen(tz_env), pos);
-        return result.DST;
-    }
-    else {
-        return DSTAdjustment();
-    }
-#else   //Arduino specific code
-    return DSTAdjustment();
-#endif
+    TimeZoneInfo tzinfo = TimeZoneInfo::getSystemTZInfo();
+    return tzinfo.DST;
 }
 
 
 #if defined(ESP32) || defined(ESP8266)
 void DSTAdjustment::setSystemDST(DSTAdjustment dst) {
-    TimeZoneInfo tzinfo = TimeZoneInfo::getSystemTZInfo();
+    TimeZoneInfo tzinfo = TimeZoneInfo::getCurrentSystemTZInfo();
     tzinfo.DST = dst;
     TimeZoneInfo::setSystemTZInfo(tzinfo);
 }
@@ -642,7 +553,7 @@ TimeZoneInfo TimeZoneInfo::fromPOSIX(String text, int& pos) {
 }
 #else
 TimeZoneInfo TimeZoneInfo::fromPOSIX(std::string text, int& pos) {
-    return TimeZoneInfo::fromPOSIX(text.c_str(), text.length()+1, pos);
+    return TimeZoneInfo::fromPOSIX(text.c_str(), (int)(text.length()+1), pos);
 }
 #endif // ARDUINO
 
@@ -654,7 +565,7 @@ TimeZoneInfo TimeZoneInfo::fromPOSIX(String text) {
 #else
 TimeZoneInfo TimeZoneInfo::fromPOSIX(std::string text) {
     int pos;
-    return TimeZoneInfo::fromPOSIX(text.c_str(), text.length() + 1, pos);
+    return TimeZoneInfo::fromPOSIX(text.c_str(), (int)(text.length() + 1), pos);
 }
 #endif // ARDUINO
 
@@ -702,7 +613,7 @@ char* TimeZoneInfo::toPOSIX(char* buffer, int bufferSize) const {
         if (daylightABR[0] == '\0') {
             //ABR name not specified
             char* newBuff = getNumericABRFromOffset(buffer, bufferSize, offsValDST);
-            bufferSize -= newBuff - buffer;
+            bufferSize -= (int)(newBuff - buffer);
             buffer = newBuff;
             if (bufferSize < 1) {
                 //Too small buffer
@@ -1372,7 +1283,7 @@ char* TimeZoneInfo::getNumericABRFromOffset(char* buffer, int bufferSize, int16_
 
 
 #if DT_UNDER_OS == DT_WIN //Windows specific code
-TimeZoneInfo TimeZoneInfo::getSystemTZInfo() {
+TimeZoneInfo TimeZoneInfo::getCurrentSystemTZInfo() {
     DYNAMIC_TIME_ZONE_INFORMATION timeZoneInformation;
     GetDynamicTimeZoneInformation(&timeZoneInformation);
 
@@ -1457,7 +1368,7 @@ TimeZoneInfo TimeZoneInfo::getSystemTZInfo() {
         ret.DST = DSTAdjustment(startRule, endRule, DST_offset_h, DST_offset_m, false);
     }
 
-    ret.timeZone = TimeZone::fromTotalMinutesOffset(-timeZoneInformation.Bias);
+    ret.timeZone = TimeZone::fromTotalMinutesOffset((int16_t)(- timeZoneInformation.Bias));
 
     std::wstring tmpKey = timeZoneInformation.TimeZoneKeyName;
     ret.keyName = std::string((const char*)&tmpKey[0], sizeof(wchar_t) / sizeof(char) * tmpKey.size());
@@ -1466,16 +1377,17 @@ TimeZoneInfo TimeZoneInfo::getSystemTZInfo() {
 
     return ret;
 }
-#elif DT_UNDER_OS == DT_LINUX //Linux specific code
-TimeZoneInfo TimeZoneInfo::getSystemTZInfo() {
-    return TimeZoneInfo(); //TODO implement
+#elif DT_UNDER_OS == DT_LINUX || DT_UNDER_OS == DT_MAC //Linux or Mac OS specific code
+//Code for retrieving time zone info on Linux and Mac OS
+//This code came from: https://github.com/HowardHinnant/date/blob/master/src/tz.cpp and was modified
+
+TimeZoneInfo TimeZoneInfo::getCurrentSystemTZInfo() {
+    return TimeZoneInfo(); //TODO implement properly, see: https://github.com/HowardHinnant/date/blob/master/src/tz.cpp
+    //TODO use tryGetPOSIXFrom_tzfile from tzFIleParser.cpp to parse timezone file (tzfile) on Linux and Mac OS
 }
-#elif DT_UNDER_OS == DT_MAC //Mac OS specific code
-TimeZoneInfo TimeZoneInfo::getSystemTZInfo() {
-    return TimeZoneInfo(); //TODO implement
-}
+
 #elif defined(ESP32) || defined(ESP8266) //ESP32, ESP8266 specific code
-TimeZoneInfo TimeZoneInfo::getSystemTZInfo() {
+TimeZoneInfo TimeZoneInfo::getCurrentSystemTZInfo() {
     const char* tz_env = getenv("TZ");
     if (tz_env != NULL) {
         int pos;
@@ -1487,8 +1399,7 @@ TimeZoneInfo TimeZoneInfo::getSystemTZInfo() {
 }
 #else //Arduino specific code
 TimeZoneInfo TimeZoneInfo::getSystemTZInfo() {
-    //TODO maybe create some weak function to handle this
-    return TimeZoneInfo(); //Not implemented on Arduino now
+    return sysTZ; //Returns own variable 
 }
 #endif
 
@@ -1499,5 +1410,23 @@ void TimeZoneInfo::setSystemTZInfo(const TimeZoneInfo& tzinfo) {
     tzinfo.toPOSIX(buffer, sizeof(buffer) / sizeof(char));
     setenv("TZ", buffer, 1/*overwrite*/);
     tzset();
+    sysTZ = tzinfo;
+}
+
+#elif defined(ARDUINO)
+void TimeZoneInfo::setSystemTZInfo(const TimeZoneInfo& tzinfo) {
+    sysTZ = tzinfo;
 }
 #endif // defined(ESP32) || defined(ESP8266)
+
+
+const TimeZoneInfo& TimeZoneInfo::getSystemTZInfo() {
+    return sysTZ;
+}
+
+void TimeZoneInfo::loadSystemTZInfo() {
+    sysTZ = getCurrentSystemTZInfo();
+}
+
+
+TimeZoneInfo TimeZoneInfo::sysTZ = getCurrentSystemTZInfo();

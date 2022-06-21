@@ -1504,7 +1504,7 @@ bool DSTAdjustment::checkDSTRegion(const DateTimeBase<T>& dt) const {
 	if (noDST()) return false;
 
 	int64_t rawDT = dt.getRaw();
-	if constexpr (has_getCurrentDSTOffsetMinutes<T>::value) {
+	CONSTEXPR_IF (has_getCurrentDSTOffsetMinutes<T>::value) {
 		rawDT -= ((int64_t)static_cast<const T*>(&dt)->getCurrentDSTOffsetMinutes()) * MINUTE; //Getting time without DST
 	}
 
@@ -1522,7 +1522,7 @@ retT DSTAdjustment::getNextTransitionDate(const DateTimeBase<T>& dt, bool& nextT
 	//if (noDST()) return DateTime(0);
 
 	int64_t rawDT = dt.getRaw();
-	if constexpr (has_getCurrentDSTOffsetMinutes<T>::value) {
+	CONSTEXPR_IF (has_getCurrentDSTOffsetMinutes<T>::value) {
 		rawDT -= ((int64_t)static_cast<const T*>(&dt)->getCurrentDSTOffsetMinutes()) * MINUTE; //Getting time without DST
 	}
 
@@ -1666,14 +1666,24 @@ public:
 	static const TimeZoneInfo Empty;
 
 	/**
-	* @brief Gets system time zone informations.
+	* @brief Gets current system time zone informations. This function checks system registers (on Windows)
+	* or reads system files with time zone (on Linux and Mac OS) or reads environment variable (on ESP32 or ESP8266).
+	* @note This function can be slow, use rather getSystemTZInfo(), which gets you reference to global variable
+	* with time zone info captured when program started.
 	* @return Returns class with system time zone informations.
 	* @note This function works only with Windows, ESP32 and ESP8266
 	* @todo Implement this also for Linux and Mac OS.
 	*/
-	static TimeZoneInfo getSystemTZInfo();
+	static TimeZoneInfo getCurrentSystemTZInfo();
 
-#if defined(ESP32) || defined(ESP8266)
+	/**
+	* @brief Gets current system time zone informations. This function just returns const reference to global variable,
+	* which was captured at startup or by loadSystemTZInfo() method.
+	* @return Returns class with system time zone informations.
+	*/
+	static const TimeZoneInfo& getSystemTZInfo();
+
+#if defined(ESP32) || defined(ESP8266) || defined(ARDUINO)
 	/**
 	* @brief Sets system time zone informations. Fields keyName, standardName, daylightName are ignored.
 	* @param[in] tzinfo Time zone info to be set.
@@ -1681,6 +1691,11 @@ public:
 	*/
 	static void setSystemTZInfo(const TimeZoneInfo& tzinfo);
 #endif // defined(ESP32) || defined(ESP8266)
+
+	/**
+	* @brief Call this to update global variable with system time zone info.
+	*/
+	static void loadSystemTZInfo();
 
 protected:
 
@@ -1747,6 +1762,19 @@ protected:
 	* @param bufferSize Buffer size including null terminator.
 	*/
 	static char* getNumericABRFromOffset(char* buffer, int bufferSize, int16_t offset);
+
+	/**
+	* @brief System time zone captured at startup.
+	*/
+	static TimeZoneInfo sysTZ;
+
+	
+#if DT_UNDER_OS == DT_LINUX || DT_UNDER_OS == DT_MAC
+	//Code for retrieving time zone info on Linux and Mac OS
+	//This function came from: https://github.com/HowardHinnant/date/blob/master/src/tz.cpp and was modified
+
+
+#endif // DT_UNDER_OS == DT_LINUX || DT_UNDER_OS == DT_MAC
 };
 
 #endif // !TIME_ZONE_H
