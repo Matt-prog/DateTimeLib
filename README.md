@@ -9,6 +9,7 @@ with Arduino. Only Gregorian calendar is supported. This library is an enhanced 
 - **Linux**
 - **Mac OS**
 - **Arduino**
+Minumum supported C++ version is C++11.
 
 ## Usage
 ### Date and time
@@ -292,10 +293,9 @@ As mentioned above, current DateTime library can be extended. For example if you
 
 ## Future plans
 - [ ] Add `isDST` flags to `date_s`, `time_s`, `date_time_s` and make `DateTimeTZ` and `DateTimeTZSysSync` to accept it.
-- [ ] Make possible to get system time zone, time zone name and `DSTAdjustment` on Linux and Mac OS.
-- [ ] Make possigle to fill `TimeZoneInfo` with system time zone informations on Windows, Linux and Mac OS.
-- [ ] Make `now()`, `setSystemTime()`, `getSystemTZ()`, `getSystemDSTAdjustment()`, `setSystemTZ()`, `setSystemDSTAdjustment()` for ESP32 and ESP8266.
-- [ ] Make cooperation with espressif sntp library on for ESP32 and ESP8266.
+- [ ] Make possible to get system time zone info on Linux and Mac OS.
+- [ ] Make possible to get at least time zone abbreviation names on Windows with `getCurrentSystemTZInfo().
+- [ ] Make `setSystemTime()` and `setSystemTimeUTC()` for ESP32 and ESP8266.
 - [ ] Make possible conversions to/from chrono library classes.
 - [ ] Add conversions from/to Julian date.
 - [ ] Maybe add software alarm from old [DateTime](https://github.com/Matt-prog/DateTime) library.
