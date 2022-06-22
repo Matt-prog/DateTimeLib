@@ -135,41 +135,55 @@ static TimeZone getSysTZ(bool includingDST) {
 #endif // DT_UNDER_OS == DT_LINUX
 
 
+#if DT_SUPPORTS_GET_SYSTZ != 0
 
 TimeZone TimeZone::getSystemTZ() {
-    TimeZoneInfo tzinfo = TimeZoneInfo::getSystemTZInfo();
-    return tzinfo.timeZone;
+    return TimeZoneInfo::getSystemTZInfo().timeZone;
 }
 
+#endif // DT_SUPPORTS_GET_SYSTZ != 0
+
+#if DT_SUPPORTS_SET_SYSTZ != 0
 #if defined(ESP32) || defined(ESP8266)
 void TimeZone::setSystemTZ(TimeZone tz, DSTAdjustment dst) {
-    TimeZoneInfo tzinfo = TimeZoneInfo::getSystemTZInfo();
+    TimeZoneInfo tzinfo = TimeZoneInfo::getCurrentSystemTZInfo();
     tzinfo.timeZone = tz;
     tzinfo.DST = dst;
     TimeZoneInfo::setSystemTZInfo(tzinfo);
 }
 
 void TimeZone::setSystemTZ(TimeZone tz) {
-    TimeZoneInfo tzinfo = TimeZoneInfo::getSystemTZInfo();
+    TimeZoneInfo tzinfo = TimeZoneInfo::getCurrentSystemTZInfo();
     tzinfo.timeZone = tz;
     TimeZoneInfo::setSystemTZInfo(tzinfo);
 }
+#else
+#error "Setting system time zone not implemented!"
 #endif // defined(ESP32) || defined(ESP8266)
 
+#endif // DT_SUPPORTS_SET_SYSTZ != 0
+
+
+#if DT_SUPPORTS_GET_SYSTZ != 0
+
 DSTAdjustment DSTAdjustment::getSystemDST() {
-    TimeZoneInfo tzinfo = TimeZoneInfo::getSystemTZInfo();
-    return tzinfo.DST;
+    return TimeZoneInfo::getSystemTZInfo().DST;
 }
 
+#endif // DT_SUPPORTS_GET_SYSTZ != 0
 
+#if DT_SUPPORTS_SET_SYSTZ != 0
 #if defined(ESP32) || defined(ESP8266)
 void DSTAdjustment::setSystemDST(DSTAdjustment dst) {
     TimeZoneInfo tzinfo = TimeZoneInfo::getCurrentSystemTZInfo();
     tzinfo.DST = dst;
     TimeZoneInfo::setSystemTZInfo(tzinfo);
 }
+#else
+#error "Setting system time zone (DST adjustment) not implemented!"
 #endif // defined(ESP32) || defined(ESP8266)
 
+#endif // DT_SUPPORTS_GET_SYSTZ != 0
 
 
 void DSTTransitionRule::setFixed(hour_t transitionHour, uint16_t dayOfYear) {
@@ -1260,9 +1274,9 @@ char* TimeZoneInfo::getNumericABRFromOffset(char* buffer, int bufferSize, int16_
     ++buffer;
     *buffer = (isNegative) ? '-' : '+';
     ++buffer;
-    *buffer = (hrs / 10) - '0';
+    *buffer = (hrs / 10) + '0';
     ++buffer;
-    *buffer = (hrs % 10) - '0';
+    *buffer = (hrs % 10) + '0';
     ++buffer;
     if (mins > 0) {
         if (bufferSize < 8) {
@@ -1270,9 +1284,9 @@ char* TimeZoneInfo::getNumericABRFromOffset(char* buffer, int bufferSize, int16_
             *buffer = '\0';
             return buffer;
         }
-        *buffer = (mins / 10) - '0';
+        *buffer = (mins / 10) + '0';
         ++buffer;
-        *buffer = (mins % 10) - '0';
+        *buffer = (mins % 10) + '0';
         ++buffer;
     }
     *buffer = '>';
@@ -1281,7 +1295,7 @@ char* TimeZoneInfo::getNumericABRFromOffset(char* buffer, int bufferSize, int16_
     return buffer;
 }
 
-
+#if DT_SUPPORTS_GET_SYSTZ != 0
 #if DT_UNDER_OS == DT_WIN //Windows specific code
 TimeZoneInfo TimeZoneInfo::getCurrentSystemTZInfo() {
     DYNAMIC_TIME_ZONE_INFORMATION timeZoneInformation;
@@ -1403,7 +1417,9 @@ TimeZoneInfo TimeZoneInfo::getSystemTZInfo() {
 }
 #endif
 
+#endif //DT_SUPPORTS_GET_SYSTZ != 0
 
+#if DT_SUPPORTS_SET_SYSTZ != 0
 #if defined(ESP32) || defined(ESP8266)
 void TimeZoneInfo::setSystemTZInfo(const TimeZoneInfo& tzinfo) {
     char buffer[58];
@@ -1417,16 +1433,14 @@ void TimeZoneInfo::setSystemTZInfo(const TimeZoneInfo& tzinfo) {
 void TimeZoneInfo::setSystemTZInfo(const TimeZoneInfo& tzinfo) {
     sysTZ = tzinfo;
 }
+#else
+#error "Setting system time zone info not implemented!";
 #endif // defined(ESP32) || defined(ESP8266)
+#endif // DT_SUPPORTS_SET_SYSTZ != 0
 
 
-const TimeZoneInfo& TimeZoneInfo::getSystemTZInfo() {
-    return sysTZ;
-}
-
-void TimeZoneInfo::loadSystemTZInfo() {
-    sysTZ = getCurrentSystemTZInfo();
-}
-
-
+#if DT_SUPPORTS_GET_SYSTZ != 0
 TimeZoneInfo TimeZoneInfo::sysTZ = getCurrentSystemTZInfo();
+#elif DT_SUPPORTS_SET_SYSTZ != 0
+TimeZoneInfo TimeZoneInfo::sysTZ;
+#endif //DT_SUPPORTS_GET_SYSTZ != 0 || DT_SUPPORTS_SET_SYSTZ != 0

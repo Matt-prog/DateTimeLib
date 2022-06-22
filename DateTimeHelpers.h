@@ -22,8 +22,13 @@
 #include <winsock.h>
 #elif defined(__APPLE__)
 #define DT_UNDER_OS	(DT_MAC) //DateTime is used in app, that will run under some OS
+#include <sys/time.h>
 #elif defined(__linux) || defined(__unix) || defined(__posix)
 #define DT_UNDER_OS	(DT_LINUX) //DateTime is used in app, that will run under some OS
+#include <sys/time.h>
+#elif defined(ESP32) || defined(ESP8266)
+#define DT_UNDER_OS	(DT_NO_OS) //DateTime is used in app, that will run on some microcontroller without OS
+#include <sys/time.h>
 #else
 #define DT_UNDER_OS	(DT_NO_OS) //DateTime is used in app, that will run on some microcontroller without OS
 #endif
@@ -31,7 +36,7 @@
 #include <time.h>
 #include <stdlib.h>
 
-#if __cplusplus >= 201703L
+#if __cplusplus >= __cpp_if_constexpr
 #define CONSTEXPR_IF if constexpr
 #else
 #define CONSTEXPR_IF if constexpr //TODO shows warning
@@ -41,10 +46,13 @@
 #include <chrono>
 #include <string>
 
-#define DT_SYNC_TYPE			int64_t
-#define DT_SYNC_FUNC()			getSysTicks()
-#define DT_SYNC_RESOLUTION		(MICROSECOND)
-#define DT_SUPPORTS_NOW         (1U)    //now() and nowUTC() functions are defined in DateTimeSysSync and DateTimeTZSysSync
+#define DT_SYNC_TYPE                int64_t
+#define DT_SYNC_FUNC()              getSysTicks()
+#define DT_SYNC_RESOLUTION          (MICROSECOND)
+#define DT_SUPPORTS_NOW             (1U)    //now() and nowUTC() functions are defined in DateTimeSysSync and DateTimeTZSysSync
+#define DT_SUPPORTS_SET_SYS_TIME    (0U)    //Under OS setting system time is not supported
+#define DT_SUPPORTS_SET_SYSTZ       (0U)    //Under OS setting system time zone is not supported
+#define DT_SUPPORTS_GET_SYSTZ       (1U)    //getSystemTZ(), getSystemDST() and getSystemTZInfo() are supported
 
 /**
 * @brief Gets system ticks in microseconds (same as micros64() on Arduino), the time will be synchronized with in classes
@@ -60,24 +68,33 @@ int64_t getSysTicks();
 
 #if defined(ESP8266)
 //ESP8266 uses micros64() for synchronizing time
-#define DT_SYNC_TYPE			int64_t
-#define DT_SYNC_FUNC()			micros64()
-#define DT_SYNC_RESOLUTION		(MICROSECOND)
-#define DT_SUPPORTS_NOW         (1U)    //now() and nowUTC() functions are defined in DateTimeSysSync and DateTimeTZSysSync
+#define DT_SYNC_TYPE                int64_t
+#define DT_SYNC_FUNC()              micros64()
+#define DT_SYNC_RESOLUTION          (MICROSECOND)
+#define DT_SUPPORTS_NOW             (1U)    //now() and nowUTC() functions are defined in DateTimeSysSync and DateTimeTZSysSync
+#define DT_SUPPORTS_SET_SYS_TIME    (1U)    //setSystemTime() and setSystemTimeUTC() are supported
+#define DT_SUPPORTS_SET_SYSTZ       (1U)    //setSystemTZ(), setSystemDST() and setSystemTZInfo() are supported
+#define DT_SUPPORTS_GET_SYSTZ       (1U)    //getSystemTZ(), getSystemDST() and getSystemTZInfo() are supported
 #elif defined(ESP32)
 //ESP32 uses esp_timer_get_time() for synchronizing time
 #include "esp_timer.h"
-#define DT_SYNC_TYPE			uint64_t
-#define DT_SYNC_FUNC()			esp_timer_get_time()
-#define DT_SYNC_RESOLUTION		(MICROSECOND)
-#define DT_SUPPORTS_NOW         (1U)    //now() and nowUTC() functions are defined in DateTimeSysSync and DateTimeTZSysSync
+#define DT_SYNC_TYPE                uint64_t
+#define DT_SYNC_FUNC()              esp_timer_get_time()
+#define DT_SYNC_RESOLUTION          (MICROSECOND)
+#define DT_SUPPORTS_NOW             (1U)    //now() and nowUTC() functions are defined in DateTimeSysSync and DateTimeTZSysSync
+#define DT_SUPPORTS_SET_SYS_TIME    (1U)    //setSystemTime() and setSystemTimeUTC() are supported
+#define DT_SUPPORTS_SET_SYSTZ       (1U)    //setSystemTZ(), setSystemDST() and setSystemTZInfo() are supported
+#define DT_SUPPORTS_GET_SYSTZ       (1U)    //getSystemTZ(), getSystemDST() and getSystemTZInfo() are supported
 #else
 //Other arduinos uses millis() for synchronizing time
-#define DT_SYNC_TYPE			int32_t
-#define DT_SYNC_FUNC()			millis()
-#define DT_SYNC_RESOLUTION		(MILLISECOND)
-#define DT_SUPPORTS_NOW         (0U)    //now() and nowUTC() functions are unsupported on Arduino, because it has no system clock
-//TODO use microseconds on arduino
+#define DT_SYNC_TYPE                int32_t
+#define DT_SYNC_FUNC()              millis() //TODO use micros64() or micros() on arduino
+#define DT_SYNC_RESOLUTION          (MILLISECOND)
+#define DT_SUPPORTS_NOW             (0U)    //now() and nowUTC() functions are unsupported on Arduino, because it has no system clock
+#define DT_SUPPORTS_SET_SYS_TIME    (0U)    //Arduino has no system time
+#define DT_SUPPORTS_SET_SYSTZ       (0U)    //Arduino has no system time zone
+#define DT_SUPPORTS_GET_SYSTZ       (0U)    //Arduino has no system time zone
+
 #endif // defined(ESP8266) || defined(ESP32)
 
 #endif //ARDUINO
@@ -1780,6 +1797,8 @@ namespace dtlib {
 
     template<class T>
     class DTStaticPrintable : public Printable, public T {
+        using T::T;
+
         inline size_t printTo(Print& p) const override {
             return T::printTo(p);
         }

@@ -316,6 +316,7 @@ public:
     inline timeval get_timeval() const {
         int64_t raw = getRawTime();
         timeval tv;
+        raw -= 62135596800000000LL;
         tv.tv_sec = raw / SECOND;
         tv.tv_usec = raw % SECOND;
         return tv;
@@ -326,7 +327,7 @@ public:
     * @param[in] time Timeval strucutre time
     */
     static derivedSyncClass from_timeval(const timeval& time) {
-        int64_t raw = (((int64_t)time.tv_sec) * SECOND + time.tv_usec);
+        int64_t raw = (((int64_t)time.tv_sec) * SECOND + time.tv_usec) + 62135596800000000LL;
         return derivedSyncClass(raw);
     }
 
@@ -1537,6 +1538,7 @@ public:
     size_t printTo(Print& p) const {
         char buffer[35];
         char* newBuff = toArray(buffer, sizeof(buffer) / sizeof(char), "yyyy-MM-ddTHH:mm:ss.ffffffZZZ");
+        p.print(buffer);
         return (size_t)(newBuff - buffer);
     }
 

@@ -16,9 +16,9 @@ int64_t DateTimeSysSync::getAndPreSetSync() {
 	return retVal;
 }
 
-#if DT_UNDER_OS > 0
+#if DT_SUPPORTS_NOW != 0
 DateTimeSysSync DateTimeSysSync::getSysTimeUTC() {
-	DateTimeSysSync dt;
+	/*DateTimeSysSync dt;
 
 	//Getting local time
 	auto now = std::chrono::system_clock::now();
@@ -42,11 +42,22 @@ DateTimeSysSync DateTimeSysSync::getSysTimeUTC() {
 
 	//Setting value without synchronizing
 	dt.setRawTime(dtlib::dateTimeToRaw(dts));
-	return dt;
+	return dt;*/
+	
+#if DT_UNDER_OS > 0
+	int64_t micros_since_epoch = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+	return DateTimeSysSync(micros_since_epoch + 62135596800000000LL);
+#else
+	//Code for ESP32 and ESP8266
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	return DateTimeSysSync::from_timeval(tv);
+#endif //DT_UNDER_OS == DT_WIN
+	
 }
 
 DateTimeSysSync DateTimeSysSync::getSysTime(bool& isDST) {
-	DateTimeSysSync dt;
+	/*DateTimeSysSync dt;
 
 	//Getting local time
 	auto now = std::chrono::system_clock::now();
@@ -71,33 +82,15 @@ DateTimeSysSync DateTimeSysSync::getSysTime(bool& isDST) {
 	
 	//Setting value without synchronizing
 	dt.setRawTime(dtlib::dateTimeToRaw(dts));
-	return dt;
-}
-
-#elif defined(ESP32) || defined(ESP8266)
-
-DateTimeSysSync DateTimeSysSync::getSysTimeUTC() {
-	struct timeval tv;
-	gettimeofday(&tv, NULL);
-	return DateTimeSysSync::from_timeval(tv);
-}
-
-DateTimeSysSync DateTimeSysSync::getSysTime(bool& isDST) {
+	return dt;*/
 	DateTimeSysSync ret = getSysTimeUTC();
-
-	TimeZoneInfo tzinfo;
-	const char* tz_env = getenv("TZ");
-	if (tz_env != NULL) {
-		int pos;
-		tzinfo = TimeZoneInfo::fromPOSIX(tz_env, strlen(tz_env), pos);
-	}
-
-	ret += tzinfo.timeZone.getTimeZoneOffset();
-	isDST = tzinfo.DST.checkDSTRegion(ret);
+	ret += TimeZone::getSystemTZ().getTimeZoneOffset();
+	DSTAdjustment dst = DSTAdjustment::getSystemDST();
+	isDST = dst.checkDSTRegion(ret);
 	if (isDST) {
-		ret += tzinfo.DST.getDSTOffset();
+		ret += dst.getDSTOffset();
 	}
 	return ret;
 }
 
-#endif // !DT_UNDER_OS > 0
+#endif // DT_SUPPORTS_NOW != 0

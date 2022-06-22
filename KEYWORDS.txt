@@ -81,6 +81,8 @@ getTimeFromLastSync	KEYWORD2
 getRawSyncTime	KEYWORD2
 now	KEYWORD2
 nowUTC	KEYWORD2
+setSystemTime	KEYWORD2
+setSystemTimeUTC	KEYWORD2
 
 DateTimeTZBase	KEYWORD1
 getTimeZone	KEYWORD2
@@ -231,8 +233,8 @@ getTimeZoneMinutes	KEYWORD2
 getTimeZone	KEYWORD2
 getTimeZoneOffset	KEYWORD2
 getTimeZoneOffsetTotalMinutes	KEYWORD2
-getSystemTZ KEYWORD2
-setSystemTZ KEYWORD2
+getSystemTZ	KEYWORD2
+setSystemTZ	KEYWORD2
 
 DSTTransitionRuleType	KEYWORD1
 DSTTRT_Fixed	LITERAL1
@@ -277,8 +279,8 @@ setDST	KEYWORD2
 isDST	KEYWORD2
 checkDSTRegion	KEYWORD2
 getNextTransitionDate	KEYWORD2
-getSystemDST KEYWORD2
-setSystemDST KEYWORD2
+getSystemDST	KEYWORD2
+setSystemDST	KEYWORD2
 NoDST	LITERAL1
 NorthAmerica	LITERAL1
 Cuba	LITERAL1
@@ -314,6 +316,8 @@ standardABR	KEYWORD2
 daylightABR	KEYWORD2
 getSystemTZInfo	KEYWORD2
 setSystemTZInfo	KEYWORD2
+loadSystemTZInfo	KEYWORD2
+getCurrentSystemTZInfo	KEYWORD2
 Empty	LITERAL1
 
 TimeZones	KEYWORD1

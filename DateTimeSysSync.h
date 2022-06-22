@@ -157,6 +157,62 @@ public:
 	}
 #endif // (DT_SUPPORTS_NOW != 0)
 
+#if DT_SUPPORTS_SET_SYS_TIME != 0
+#if defined(ESP32) || defined(ESP8266)
+
+	/**
+	* @brief Sets system time as local time.
+	* @param[in] time Local time to set.
+	* @note If time is DateTimeTZ or DateTimeTZSysSync type, system time zone and DST adjustment will be set too.
+	*/
+	template<class T>
+	static typename dtlib::enable_if<(has_getTimeZone<T>::value || has_getDST<T>::value), void>::type setSystemTime(const DateTimeBase<T>& time) {
+		setSystemTimeUTC(static_cast<const T*>(&time)->getUTC()); //Set time as fast as possible
+		
+		//Then set time zone
+		TimeZoneInfo tzinfo = TimeZoneInfo::getCurrentSystemTZInfo();
+		tzinfo.timeZone = static_cast<const T*>(&time)->getTimeZone();
+		tzinfo.DST = static_cast<const T*>(&time)->getDST();
+		TimeZoneInfo::setSystemTZInfo(tzinfo);
+	}
+
+	/**
+	* @brief Sets system time as local time.
+	* @param[in] time Local time to set.
+	* @param[in] isDST True if current time has DST applied.
+	* @note Time zone and DST adjustment stays unchanged.
+	*/
+	template<class T>
+	static typename dtlib::enable_if<!(has_getTimeZone<T>::value || has_getDST<T>::value), void>::type setSystemTime(const DateTimeBase<T>& time, bool isDST) {
+		DateTimeSysSync utc = (DateTimeSysSync)time;
+
+		TimeZoneInfo::loadSystemTZInfo();
+		TimeZoneInfo& tzinfo = TimeZoneInfo::getSystemTZInfo();
+		utc -= tzinfo.timeZone.getTimeZoneOffset();
+		if (isDST) {
+			utc -= tzinfo.DST.getDSTOffset();
+		}
+		setSystemTimeUTC((DateTime)utc);
+	}
+
+	/**
+	* @brief Sets system time as UTC.
+	* @param[in] time UTC time to set.
+	*/
+	inline static void setSystemTimeUTC(const DateTime& time) {
+		struct timeval tv = time.get_timeval();
+		settimeofday(&tv, NULL);
+	}
+
+#else
+#error "Setting system time is not implemented!"
+#endif // defined(ESP32) || defined(ESP8266)
+
+#endif // DT_SUPPORTS_SET_SYS_TIME != 0
+
+
+
+
 
 	/**
 	* @brief Gets raw sync time.

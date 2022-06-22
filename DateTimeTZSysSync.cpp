@@ -181,7 +181,7 @@ void DateTimeTZSysSync::setSyncedTime(int64_t baseRawValue, DT_SYNC_TYPE syncTim
 
 
 
-#if DT_UNDER_OS > 0
+#if (DT_SUPPORTS_NOW != 0)
 DateTimeTZSysSync DateTimeTZSysSync::getSysTime() {
 	DateTimeSysSync ndt = DateTimeSysSync::getSysTimeUTC();
 
@@ -192,13 +192,4 @@ DateTimeTZSysSync DateTimeTZSysSync::getSysTime() {
 	return DateTimeTZSysSync(ndt, tz, adj, false);
 }
 
-#elif defined(ESP32) || defined(ESP8266)
-
-DateTimeTZSysSync DateTimeTZSysSync::getSysTime() {
-	DateTimeSysSync ret = DateTimeSysSync::getSysTimeUTC();
-	TimeZoneInfo tzinfo = TimeZoneInfo::getSystemTZInfo();
-	ret += tzinfo.timeZone.getTimeZoneOffset();
-	return DateTimeTZSysSync(ret, tzinfo.timeZone, tzinfo.DST, false);
-}
-
-#endif // !DT_UNDER_OS > 0
+#endif // DT_SUPPORTS_NOW != 0

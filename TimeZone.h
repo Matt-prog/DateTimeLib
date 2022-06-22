@@ -794,13 +794,16 @@ struct TimeZone {
 		return tz;
 	}
 
+#if DT_SUPPORTS_GET_SYSTZ != 0
 	/**
 	* @brief Gets current system time zone.
 	* @note Valid time zone offset is returned on: Windows, Linux, Mac OS, ESP8266 and ESP32.
 	* On other Arduino boards UTC+00 time zone offset is returned.
 	*/
 	static TimeZone getSystemTZ();
+#endif //DT_SUPPORTS_GET_SYSTZ != 0
 
+#if DT_SUPPORTS_SET_SYSTZ != 0
 #if defined(ESP32) || defined(ESP8266)
 	/**
 	* @brief Sets current system time zone.
@@ -816,7 +819,13 @@ struct TimeZone {
 	* @param tz Time zone to be set.
 	*/
 	static void setSystemTZ(TimeZone tz);
+#else
+#error "Setting system time zone not implemented!"
 #endif // defined(ESP32) || defined(ESP8266)
+
+#endif // DT_SUPPORTS_SET_SYSTZ != 0
+
+
 
 protected:
 	int8_t timeZoneOffset15min;
@@ -1296,6 +1305,7 @@ public:
 	template<class T, class retT = DateTime>
 	retT getNextTransitionDate(const DateTimeBase<T>& dt, bool& nextTransIsDST) const;
 
+#if DT_SUPPORTS_GET_SYSTZ != 0
 	/**
 	* @brief Gets current system DST adjustment.
 	* @note Valid value is returned only on: Windows, Linux, Mac OS, ESP8266 and ESP32.
@@ -1303,14 +1313,23 @@ public:
 	*/
 	static DSTAdjustment getSystemDST();
 
+#endif // DT_SUPPORTS_GET_SYSTZ != 0
+
+#if DT_SUPPORTS_SET_SYSTZ != 0
 #if defined(ESP32) || defined(ESP8266)
 	/**
 	* @brief Sets current system DSTAdjustment.
 	* @note This function can be used only with ESP32 or ESP8266
 	* @param dst DST adjustment to be set.
 	*/
-	static void setSystemDST( DSTAdjustment dst);
+	static void setSystemDST(DSTAdjustment dst);
+#else
+#error "Setting system time zone (DST adjustment) not implemented!"
 #endif // defined(ESP32) || defined(ESP8266)
+
+#endif // DT_SUPPORTS_GET_SYSTZ != 0
+
+
 
 	/**
 	 * @defgroup DSTAdjRules DST adjustment rules by countries and regions.
@@ -1665,6 +1684,8 @@ public:
 	*/
 	static const TimeZoneInfo Empty;
 
+#if DT_SUPPORTS_GET_SYSTZ != 0
+
 	/**
 	* @brief Gets current system time zone informations. This function checks system registers (on Windows)
 	* or reads system files with time zone (on Linux and Mac OS) or reads environment variable (on ESP32 or ESP8266).
@@ -1681,8 +1702,20 @@ public:
 	* which was captured at startup or by loadSystemTZInfo() method.
 	* @return Returns class with system time zone informations.
 	*/
-	static const TimeZoneInfo& getSystemTZInfo();
+	inline static const TimeZoneInfo& getSystemTZInfo() {
+		return sysTZ;
+	}
 
+	/**
+	* @brief Call this to update global variable with system time zone info.
+	*/
+	inline static void loadSystemTZInfo() {
+		sysTZ = getCurrentSystemTZInfo();
+	}
+
+#endif // DT_SUPPORTS_GET_SYSTZ != 0
+
+#if DT_SUPPORTS_SET_SYSTZ != 0
 #if defined(ESP32) || defined(ESP8266) || defined(ARDUINO)
 	/**
 	* @brief Sets system time zone informations. Fields keyName, standardName, daylightName are ignored.
@@ -1690,13 +1723,11 @@ public:
 	* @note This function works only with ESP32 and ESP8266
 	*/
 	static void setSystemTZInfo(const TimeZoneInfo& tzinfo);
-#endif // defined(ESP32) || defined(ESP8266)
-
-	/**
-	* @brief Call this to update global variable with system time zone info.
-	*/
-	static void loadSystemTZInfo();
-
+#else
+#error "Setting system time zone info not implemented!";
+#endif // defined(ESP32) || defined(ESP8266) || defined(ARDUINO)
+#endif // DT_SUPPORTS_SET_SYSTZ != 0
+	
 protected:
 
 	/**
@@ -1763,18 +1794,14 @@ protected:
 	*/
 	static char* getNumericABRFromOffset(char* buffer, int bufferSize, int16_t offset);
 
+#if DT_SUPPORTS_GET_SYSTZ != 0 || DT_SUPPORTS_SET_SYSTZ != 0
 	/**
 	* @brief System time zone captured at startup.
 	*/
 	static TimeZoneInfo sysTZ;
+#endif //DT_SUPPORTS_GET_SYSTZ != 0 || DT_SUPPORTS_SET_SYSTZ != 0
 
-	
-#if DT_UNDER_OS == DT_LINUX || DT_UNDER_OS == DT_MAC
-	//Code for retrieving time zone info on Linux and Mac OS
-	//This function came from: https://github.com/HowardHinnant/date/blob/master/src/tz.cpp and was modified
-
-
-#endif // DT_UNDER_OS == DT_LINUX || DT_UNDER_OS == DT_MAC
 };
+
 
 #endif // !TIME_ZONE_H
