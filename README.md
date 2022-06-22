@@ -294,7 +294,7 @@ As mentioned above, current DateTime library can be extended. For example if you
 ## Future plans
 - [ ] Add `isDST` flags to `date_s`, `time_s`, `date_time_s` and make `DateTimeTZ` and `DateTimeTZSysSync` to accept it.
 - [ ] Make possible to get system time zone info on Linux and Mac OS.
-- [ ] Make possible to get at least time zone abbreviation names on Windows with `getCurrentSystemTZInfo()`.
+- [ ] Make possible to get time zone abbreviation names on Windows with `getCurrentSystemTZInfo()`.
 - [ ] Make `setSystemTime()` and `setSystemTimeUTC()` for ESP32 and ESP8266.
 - [ ] Make possible conversions from/to chrono library classes.
 - [ ] Add conversions from/to Julian date.
@@ -313,4 +313,4 @@ Any contribution is appreciated.
 ## License
 Copyright © 2022 [Matej Fitoš](https://github.com/Matt-prog).
 
-This project is [MIT](https://github.com/Matt-prog/WorldTimeAPI/blob/main/LICENSE) licensed.
+This project is [MIT](https://github.com/Matt-prog/DateTimeLib/blob/main/LICENSE) licensed.
