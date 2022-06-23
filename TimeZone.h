@@ -1556,8 +1556,7 @@ retT DSTAdjustment::getNextTransitionDate(const DateTimeBase<T>& dt, bool& nextT
 /**
 * @class TimeZoneInfo
 * @brief Class, that contains time zone and DST and it's names.
-* @todo Add functions for reading system time zone and DST.
-* @todo Documentation
+* @todo Add function for filling abbreviations from offset if not set.
 */
 class TimeZoneInfo {
 public:
@@ -1629,7 +1628,6 @@ public:
 #else
 	std::string toPOSIX() const;
 #endif // ARDUINO
-
 
 	/**
 	* @brief Time zone offset.

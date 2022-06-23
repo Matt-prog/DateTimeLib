@@ -77,7 +77,7 @@ int64_t getSysTicks();
 #define DT_SUPPORTS_GET_SYSTZ       (1U)    //getSystemTZ(), getSystemDST() and getSystemTZInfo() are supported
 #elif defined(ESP32)
 //ESP32 uses esp_timer_get_time() for synchronizing time
-#include "esp_timer.h"
+#include "esp_timer.h" //for function: esp_timer_get_time()
 #define DT_SYNC_TYPE                uint64_t
 #define DT_SYNC_FUNC()              esp_timer_get_time()
 #define DT_SYNC_RESOLUTION          (MICROSECOND)
