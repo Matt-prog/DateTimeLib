@@ -36,11 +36,6 @@
 * because they don't have to always return accurate value. When using millis() for synchronization,
 * microseconds field stays unchanged.
 * 
-* ## Extra member functions
-* + **On Windows OS, Linux or Mac OS:**
-*   - now() returns current system time.
-*   @note systemDSTAdjustment cannot be retrieved right now on Linux or Mac OS.
-* 
 * @see DateTime
 * @see DateTimeBase
 */

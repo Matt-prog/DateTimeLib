@@ -79,10 +79,89 @@ int64_t getSysTicks();
 #define DT_SUPPORTS_NOW         (0U)    //now() and nowUTC() functions are unsupported on Arduino, because it has no system clock
 //TODO use microseconds on arduino
 #endif // defined(ESP8266) || defined(ESP32)
-
 #endif //ARDUINO
 
 #endif
+
+
+//Arduino compatibile definitions for non-arduino
+#ifndef ARDUINO
+//Non-arduino
+
+#define PROGMEM
+#define PGM_P  const char *
+#define PSTR(str) (str)
+
+#define memchr_P(s, c, n) memchr((s), (c), (n))
+#define memcmp_P(s1, s2, n) memcmp((s1), (s2), (n))
+#define memccpy_P(dest, src, c, n) memccpy((dest), (src), (c), (n))
+#define memcpy_P(dest, src, n) memcpy((dest), (src), (n))
+#define memmem_P(haystack, haystacklen, needle, needlelen) memmem((haystack), (haystacklen), (needle), (needlelen))
+#define memrchr_P(s, c, n) memrchr((s), (c), (n))
+#define strcat_P(dest, src) strcat((dest), (src))
+#define strchr_P(s, c) strchr((s), (c))
+#define strchrnul_P(s, c) strchrnul((s), (c))
+#define strcmp_P(a, b) strcmp((a), (b))
+#define strcpy_P(dest, src) strcpy((dest), (src))
+#define strcasecmp_P(s1, s2) strcasecmp((s1), (s2))
+#define strcasestr_P(haystack, needle) strcasestr((haystack), (needle))
+#define strcspn_P(s, accept) strcspn((s), (accept))
+#define strlcat_P(s1, s2, n) strlcat((s1), (s2), (n))
+#define strlcpy_P(s1, s2, n) strlcpy((s1), (s2), (n))
+#define strlen_P(a) strlen((a))
+#define strnlen_P(s, n) strnlen((s), (n))
+#define strncmp_P(s1, s2, n) strncmp((s1), (s2), (n))
+#define strncasecmp_P(s1, s2, n) strncasecmp((s1), (s2), (n))
+#define strncat_P(s1, s2, n) strncat((s1), (s2), (n))
+#define strncpy_P(s1, s2, n) strncpy((s1), (s2), (n))
+#define strpbrk_P(s, accept) strpbrk((s), (accept))
+#define strrchr_P(s, c) strrchr((s), (c))
+#define strsep_P(sp, delim) strsep((sp), (delim))
+#define strspn_P(s, accept) strspn((s), (accept))
+#define strstr_P(a, b) strstr((a), (b))
+#define strtok_P(s, delim) strtok((s), (delim))
+#define strtok_rP(s, delim, last) strtok((s), (delim), (last))
+
+#define strlen_PF(a) strlen((a))
+#define strnlen_PF(src, len) strnlen((src), (len))
+#define memcpy_PF(dest, src, len) memcpy((dest), (src), (len))
+#define strcpy_PF(dest, src) strcpy((dest), (src))
+#define strncpy_PF(dest, src, len) strncpy((dest), (src), (len))
+#define strcat_PF(dest, src) strcat((dest), (src))
+#define strlcat_PF(dest, src, len) strlcat((dest), (src), (len))
+#define strncat_PF(dest, src, len) strncat((dest), (src), (len))
+#define strcmp_PF(s1, s2) strcmp((s1), (s2))
+#define strncmp_PF(s1, s2, n) strncmp((s1), (s2), (n))
+#define strcasecmp_PF(s1, s2) strcasecmp((s1), (s2))
+#define strncasecmp_PF(s1, s2, n) strncasecmp((s1), (s2), (n))
+#define strstr_PF(s1, s2) strstr((s1), (s2))
+#define strlcpy_PF(dest, src, n) strlcpy((dest), (src), (n))
+#define memcmp_PF(s1, s2, n) memcmp((s1), (s2), (n))
+
+#define sprintf_P(s, f, ...) sprintf((s), (f), __VA_ARGS__)
+#define snprintf_P(s, f, ...) snprintf((s), (f), __VA_ARGS__)
+
+#define pgm_read_byte(addr) (*(const unsigned char *)(addr))
+#define pgm_read_word(addr) (*(const unsigned short *)(addr))
+#define pgm_read_dword(addr) (*(const unsigned long *)(addr))
+#define pgm_read_float(addr) (*(const float *)(addr))
+#define pgm_read_ptr(addr) (*(const void **)(addr))
+
+#define pgm_read_byte_near(addr) pgm_read_byte(addr)
+#define pgm_read_word_near(addr) pgm_read_word(addr)
+#define pgm_read_dword_near(addr) pgm_read_dword(addr)
+#define pgm_read_float_near(addr) pgm_read_float(addr)
+#define pgm_read_ptr_near(addr) pgm_read_ptr(addr)
+
+#define pgm_read_byte_far(addr) pgm_read_byte(addr)
+#define pgm_read_word_far(addr) pgm_read_word(addr)
+#define pgm_read_dword_far(addr) pgm_read_dword(addr)
+#define pgm_read_float_far(addr) pgm_read_float(addr)
+#define pgm_read_ptr_far(addr) pgm_read_ptr(addr)
+
+#define pgm_get_far_address(addr) (&(addr))
+
+#endif // !ARDUINO
 
 #include "DT_type_traits_helper.h"
 
@@ -165,9 +244,53 @@ template<class C> struct name<C, typename dtlib::enable_if<!dtlib::is_same<declt
 #define MAX_DAYS ( 106751981L)	//Maximum valid days value
 #define MIN_DAYS (-106751983L)	//Minimum valid days value
 
+const char sunday_txt[] PROGMEM     = "Sunday";
+const char monday_txt[] PROGMEM     = "Monday";
+const char tuesday_txt[] PROGMEM    = "Tuesday";
+const char wednesday_txt[] PROGMEM  = "Wednesday";
+const char thursday_txt[] PROGMEM   = "Thursday";
+const char friday_txt[] PROGMEM     = "Friday";
+const char saturday_txt[] PROGMEM   = "Saturday";
 
-const char* const dt_day_names[] = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
-const char* const dt_month_names[] = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
+const char* const dt_day_names[] PROGMEM =
+{
+    sunday_txt,
+    monday_txt,
+    tuesday_txt,
+    wednesday_txt,
+    thursday_txt,
+    friday_txt,
+    saturday_txt
+};
+
+const char january_txt[] PROGMEM    = "January";
+const char february_txt[] PROGMEM   = "February";
+const char march_txt[] PROGMEM      = "March";
+const char april_txt[] PROGMEM      = "April";
+const char may_txt[] PROGMEM        = "May";
+const char june_txt[] PROGMEM       = "June";
+const char july_txt[] PROGMEM       = "July";
+const char august_txt[] PROGMEM     = "August";
+const char september_txt[] PROGMEM  = "September";
+const char october_txt[] PROGMEM    = "October";
+const char november_txt[] PROGMEM   = "November";
+const char december_txt[] PROGMEM   = "December";
+
+const char* const dt_month_names[] PROGMEM = 
+{
+    january_txt,
+    february_txt,
+    march_txt,
+    april_txt,
+    may_txt,
+    june_txt,
+    july_txt,
+    august_txt,
+    september_txt,
+    october_txt,
+    november_txt,
+    december_txt
+};
 
 /**
 * @enum WeekOfMonth
@@ -207,11 +330,12 @@ struct DayOfWeek {
 
     /**
     * @brief Gets pointer to month name or NULL when month has invalid value.
+    * @note On Arduino pointer to program memory (PROGMEM) is returned.
     */
     inline const char* const getName() const {
         uint8_t val = value - 1;
         if (val < 7) {
-            return dt_day_names[val];
+            return (const char*)pgm_read_ptr(&(dt_day_names[val]));
         }
         return NULL;
     }
@@ -288,7 +412,7 @@ struct Month {
     inline const char* const getName() const {
         uint8_t val = value - 1;
         if (val < 12) {
-            return dt_month_names[val];
+            return (const char*)pgm_read_ptr(&(dt_month_names[val]));
         }
         return NULL;
     }

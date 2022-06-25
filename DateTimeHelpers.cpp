@@ -1066,9 +1066,13 @@ namespace dtlib {
 						case 3:
 							if (bufferSize >= 3) {
 								uint8_t index = ds.dayOfWeek - 1;
-								buffer[0] = weekDayNames[index][0];
-								buffer[1] = weekDayNames[index][1];
-								buffer[2] = weekDayNames[index][2];
+								const char* dayNamePtr = (const char*)pgm_read_ptr(&(weekDayNames[index]));
+#if _MSC_VER && !__INTEL_COMPILER
+								//Specific code for MVSC
+								memcpy_s(buffer, 3, dayNamePtr, 3);
+#else
+								memcpy_P(buffer, dayNamePtr, 3);
+#endif
 								buffer += 3;
 								bufferSize -= 3;
 							}
@@ -1077,13 +1081,14 @@ namespace dtlib {
 							}
 							break;
 						case 4: {
-							size_t len = strlen(weekDayNames[ds.dayOfWeek - 1]);
+							const char* dayNamePtr = (const char*)pgm_read_ptr(&(weekDayNames[ds.dayOfWeek - 1]));
+							size_t len = strlen_P(dayNamePtr);
 							if (len > bufferSize) len = bufferSize; //Limit
 #if _MSC_VER && !__INTEL_COMPILER
 							//Specific code for MVSC
-							memcpy_s(buffer, bufferSize, weekDayNames[ds.dayOfWeek - 1], len);
+							memcpy_s(buffer, bufferSize, dayNamePtr, len);
 #else
-							memcpy(buffer, dt_day_names[ds.dayOfWeek - 1], len);
+							memcpy_P(buffer, dayNamePtr, len);
 #endif
 							bufferSize -= len;
 							buffer += len;
@@ -1114,16 +1119,20 @@ namespace dtlib {
 							}
 							else {
 								if (value < 0) {
-									buffer[0] = 'B';
-									buffer[1] = '.';
-									buffer[2] = 'C';
-									buffer[3] = '.';
+#if _MSC_VER && !__INTEL_COMPILER
+									//Specific code for MVSC
+									memcpy_s(buffer, 4, "B.C.", 4);
+#else
+									memcpy_P(buffer, PSTR("B.C."), 4);
+#endif
 								}
 								else {
-									buffer[0] = 'A';
-									buffer[1] = '.';
-									buffer[2] = 'D';
-									buffer[3] = '.';
+#if _MSC_VER && !__INTEL_COMPILER
+									//Specific code for MVSC
+									memcpy_s(buffer, 4, "A.D.", 4);
+#else
+									memcpy_P(buffer, PSTR("A.D."), 4);
+#endif
 								}
 								bufferSize -= 4;
 								buffer += 4;
@@ -1216,9 +1225,13 @@ namespace dtlib {
 						case 3:
 							if (bufferSize >= 3) {
 								uint8_t index = ds.month - 1;
-								buffer[0] = monthNames[index][0];
-								buffer[1] = monthNames[index][1];
-								buffer[2] = monthNames[index][2];
+								const char* monthNamePtr = (const char*)pgm_read_ptr(&(monthNames[index]));
+#if _MSC_VER && !__INTEL_COMPILER
+								//Specific code for MVSC
+								memcpy_s(buffer, 3, monthNamePtr, 3);
+#else
+								memcpy_P(buffer, monthNamePtr, 3);
+#endif
 								buffer -= 3;
 								bufferSize -= 3;
 							}
@@ -1227,13 +1240,14 @@ namespace dtlib {
 							}
 							break;
 						case 4: {
-							size_t len = strlen(monthNames[ds.month - 1]);
+							const char* monthNamePtr = (const char*)pgm_read_ptr(&(monthNames[ds.month - 1]));
+							size_t len = strlen_P(monthNamePtr);
 							if (len > bufferSize) len = bufferSize; //Limit
 #if _MSC_VER && !__INTEL_COMPILER
 							//Specific code for MVSC
-							memcpy_s(buffer, bufferSize, monthNames[ds.month - 1], len);
+							memcpy_s(buffer, bufferSize, monthNamePtr, len);
 #else
-							memcpy(buffer, dt_day_names[ds.dayOfWeek - 1], len);
+							memcpy_P(buffer, monthNamePtr, len);
 #endif
 							bufferSize -= len;
 							buffer += len;
@@ -1442,15 +1456,20 @@ namespace dtlib {
 						}
 						case 3: {
 							uint8_t index = ds.dayOfWeek - 1;
-							buffer[0] = weekDayNames[index][0];
-							buffer[1] = weekDayNames[index][1];
-							buffer[2] = weekDayNames[index][2];
+							const char* dayNamePtr = (const char*)pgm_read_ptr(&(weekDayNames[index]));
+#if _MSC_VER && !__INTEL_COMPILER
+							//Specific code for MVSC
+							memcpy_s(buffer, 3, dayNamePtr, 3);
+#else
+							memcpy_P(buffer, dayNamePtr, 3);
+#endif
 							buffer[3] = 0; //Null terminator
 							ret += buffer;
 							break;
 						}
 						case 4: {
-							ret += weekDayNames[ds.dayOfWeek - 1];
+							const char* dayNamePtr = (const char*)pgm_read_ptr(&(weekDayNames[ds.dayOfWeek - 1]));
+							ret += dayNamePtr;
 							break;
 						}
 						}
@@ -1477,10 +1496,10 @@ namespace dtlib {
 					case 'g': // B.C. or A.C.
 						if (lastChar == 'g' || value < 0) {
 							if (value < 0) {
-								ret += "B.C.";
+								ret += PSTR("B.C.");
 							}
 							else {
-								ret += "A.D.";
+								ret += PSTR("A.D.");
 							}
 						}
 						break;
@@ -1563,15 +1582,20 @@ namespace dtlib {
 						case 3:
 						{
 							uint8_t index = ds.month - 1;
-							buffer[0] = monthNames[index][0];
-							buffer[1] = monthNames[index][1];
-							buffer[2] = monthNames[index][2];
+							const char* monthNamePtr = (const char*)pgm_read_ptr(&(monthNames[index]));
+#if _MSC_VER && !__INTEL_COMPILER
+							//Specific code for MVSC
+							memcpy_s(buffer, 3, monthNamePtr, 3);
+#else
+							memcpy_P(buffer, monthNamePtr, 3);
+#endif
 							buffer[3] = 0; //Null terminator
 							ret += buffer;
 						}
 						break;
 						case 4: {
-							ret += monthNames[ds.month - 1];
+							const char* monthNamePtr = (const char*)pgm_read_ptr(&(monthNames[ds.month - 1]));
+							ret += monthNamePtr;
 							break;
 						}
 						}
@@ -1619,10 +1643,10 @@ namespace dtlib {
 						}
 						else {
 							if (ts.hours.isAM()) {
-								ret += "AM";
+								ret += PSTR("AM");
 							}
 							else {
-								ret += "PM";
+								ret += PSTR("PM");
 							}
 						}
 						break;
@@ -2042,7 +2066,8 @@ namespace dtlib {
 							}
 							bool found = false;
 							for (uint8_t i = 0; i < 12; i++) {
-								bool match = toLowerChar(monthNames[i][0]) == toLowerChar(buffer[0]) && toLowerChar(monthNames[i][1]) == toLowerChar(buffer[1]) && toLowerChar(monthNames[i][2]) == toLowerChar(buffer[2]);
+								const char* monthNamePtr = (const char*)pgm_read_ptr(&(monthNames[i]));
+								bool match = toLowerChar(pgm_read_byte(monthNamePtr)) == toLowerChar(buffer[0]) && toLowerChar(pgm_read_byte(monthNamePtr + 1)) == toLowerChar(buffer[1]) && toLowerChar(pgm_read_byte(monthNamePtr + 2)) == toLowerChar(buffer[2]);
 								if (match) {
 									found = true;
 									parsedValue.month = i + 1;
@@ -2059,8 +2084,9 @@ namespace dtlib {
 							bool found = false;
 							for (uint8_t i = 0; i < 12; i++) {
 								uint8_t j = 0;
-								for (; monthNames[i][j] != 0 && bufferSize > j && toLowerChar(monthNames[i][j]) == toLowerChar(buffer[j]); j++);
-								bool match = monthNames[i][j] == 0;
+								const char* monthNamePtr = (const char*)pgm_read_ptr(&(monthNames[i]));
+								for (; pgm_read_byte(monthNamePtr + j) != 0 && bufferSize > j && toLowerChar(pgm_read_byte(monthNamePtr + j)) == toLowerChar(buffer[j]); j++);
+								bool match = pgm_read_byte(monthNamePtr + j) == 0;
 								if (match) {
 									found = true;
 									parsedValue.month = i + 1;

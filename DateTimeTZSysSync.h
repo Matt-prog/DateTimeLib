@@ -31,19 +31,6 @@
 * Difference between DateTimeSysSync and DateTimeTZSysSync is, that DateTimeTZSysSync has extra
 * fields for time zone and DST adjustment.
 * 
-* ## Extra member functions
-* + **On Windows OS:**
-*   - now() returns current system time.
-*   - systemTZ - field with system time zone offset captured at start of program.
-*   - getSystemTZ() - gets system time zone offset.
-*   - systemDSTAdjustment - field with system DST adjustment captured at start of program.
-*   - getSystemDSTAdjustment() - gets system DST adjustment.
-* + **On Linux or Mac OS:**
-*   - now() returns current system time.
-*   - systemTZ - field with system time zone and DST offset captured at start of program.
-*   - getSystemTZ() - gets system time zone offset.
-*   @note systemDSTAdjustment cannot be retrieved right now on Linux or Mac OS.
-* 
 * ## DST region check
 * DateTimeTZSysSync value is constantly incrementing, because it's value is synchronized with system time.
 * Every time you get any time or date field, it is recalculated. During this recalculation DST region would
